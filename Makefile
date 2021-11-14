@@ -58,7 +58,7 @@ endif
 
 ifeq ($(PROJECT_TYPE), BIN)
 TARGET_RULE = build-bin
-else ifeq ($(BUILD_TYPE), SLIB)
+else ifeq ($(PROJECT_TYPE), SLIB)
 TARGET_RULE = build-static-lib
 else
 $(error Invalid PROJECT_TYPE. Possible values: BIN, SLIB)
