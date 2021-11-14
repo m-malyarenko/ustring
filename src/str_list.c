@@ -59,22 +59,23 @@ str_list_t* str_list_copy(const str_list_t* other) {
     return self;
 }
 
-void str_list_drop(str_list_t* self) {
-    if (self == NULL) {
+void str_list_drop(str_list_t** self) {
+    if ((self == NULL) || (*self == NULL)) {
         return;
     }
 
-    if (self->buffer != NULL) {
-        for (size_t i = 0; i < self->size; i++) {
-            str_drop(self->buffer[i]);
+    if ((*self)->buffer != NULL) {
+        const size_t len = (*self)->size;
+        for (size_t i = 0; i < len; i++) {
+            str_drop(&(*self)->buffer[i]);
         }
 
-        free(self->buffer);
-        self->buffer = NULL;
+        free((*self)->buffer);
     }
 
-    self->cap = 0;
-    self->size = 0;
+    (*self)->cap = 0;
+    (*self)->size = 0;
+    *self = NULL;
 }
 
 void str_list_push(str_list_t* self, str_t* string) {

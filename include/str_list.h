@@ -61,7 +61,7 @@ str_list_t* str_list_copy(const str_list_t* other);
  * @note If @code{self} is @c NULL function does nothing
  * @warning After string list is dropped it must not be used
  */
-void str_list_drop(str_list_t* self);
+void str_list_drop(str_list_t** self);
 
 /**
  * @brief Adds string instance to the end of the list

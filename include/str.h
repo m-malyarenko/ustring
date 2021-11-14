@@ -1,12 +1,12 @@
 /******************************************************************************
  * 
  * @file    str.h
- * @date    15 Aug 2021
+ * @date    14 Nov 2021
  * @author  Mikhail Malyarenko <malyarenko.md@gmail.com>
  * 
  * @brief   String library API
  * 
- * API header for the string library for C language
+ * API header for the C language string library 
  * 
  *****************************************************************************/
 
@@ -58,7 +58,7 @@ str_t* str_copy(const str_t* other);
  * @note If @code{self} is @c NULL function does nothing
  * @warning After string is dropped it must not be used
  */
-void str_drop(str_t* self);
+void str_drop(str_t** self);
 
 /**
  * @brief Returns the length of the string.

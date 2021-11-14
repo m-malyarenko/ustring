@@ -77,18 +77,19 @@ str_t* str_copy(const str_t* other) {
     return self;
 }
 
-void str_drop(str_t* self) {
-    if (self == NULL) {
+void str_drop(str_t** self) {
+    if ((self == NULL) || (*self == NULL)) {
         return;
     }
 
-    if (self->buffer != NULL) {
-        free(self->buffer);
-        self->buffer = NULL;
+    if ((*self)->buffer != NULL) {
+        free((*self)->buffer);
+        (*self)->buffer = NULL;
     }
 
-    self->cap = 0;
-    self->len = 0;
+    (*self)->cap = 0;
+    (*self)->len = 0;
+    *self = NULL;
 }
 
 size_t str_len(const str_t* self) {
