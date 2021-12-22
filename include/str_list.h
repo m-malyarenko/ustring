@@ -123,8 +123,8 @@ bool str_list_is_empty(const str_list_t* self);
  * @param self Pointer to the initialised string list
  * @param idx Position of the string in the given string list
  * @return String of the string list with the given index; @c 0 if @c idx
- * is greater or equal to the size of the string or if the string is
- * empty or @c NULL
+ *      is greater or equal to the size of the string or if the string is
+ *      empty or @c NULL
  */
 str_t* str_list_at(const str_list_t* self, const size_t idx);
 
@@ -139,7 +139,7 @@ str_t* str_list_at(const str_list_t* self, const size_t idx);
  * @param delim Delimeter. Null-terminated string literal with
  *              valid ASCII characters.
  * @return Pointer to the new string list that contains all resulting
- *         string chunks: Empty string list if @c self is @c NULL or empty
+ *      string chunks: Empty string list if @c self is @c NULL or empty
  * 
  * @example
  * 
