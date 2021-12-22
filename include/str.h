@@ -16,6 +16,7 @@
 #ifndef __STR_H__
 #define __STR_H__
 
+#include <stddef.h>
 #include <stdbool.h>
 
 /**
@@ -143,6 +144,7 @@ const char* str_as_ptr(const str_t* self);
  * @example['61'] str_example.c
  */
 str_t* str_append(str_t* self, const char* string);
+// TODO str_t* -> void
 
 /**
  * @brief Creates new string which is a result of concatenation of
@@ -168,5 +170,45 @@ str_t* str_concat(const str_t* str_a, const str_t* str_b);
  * @example['94'] str_example.c
  */
 str_t* str_trim(str_t* self);
+// TODO str_t* -> void
+
+// TODO implement str_eq
+// bool str_eq(const str_t* a, const str_t* b);
+
+// TODO implement str_truncate
+// void str_truncate(str_t* self, size_t len);
+
+// TODO implement str_contains
+// bool str_contains(const str_t* self, const char* pattern);
+
+// TODO implement str_trim_matches
+// void str_trim_matches(str_t* self, const char* pattern);
+
+// TODO implement str_trim_start_matches
+// void str_trim_start_matches(str_t* self, const char* pattern);
+
+// TODO implement str_trim_end_matches
+// void str_trim_end_matches(str_t* self, const char* pattern);
+
+// TODO implement str_replace
+// void str_replace(str_t* self, const char* pattern, const char* replacement);
+
+// TODO implement str_replacen
+// void str_replacen(str_t* self, const char* pattern, const char* replacement, size_t n);
+
+// TODO implement str_shrink_to_fit
+// void str_shrink_to_fit(str_t* self);
+
+// TODO implement str_starts_with
+// bool str_starts_with(const str_t* self, const char* pattern);
+
+// TODO implement str_ends_with
+// bool str_ends_with(const str_t* self, const char* pattern);
+
+// TODO implement str_to_lowercase
+// void str_to_lowercase(str_t* slef);
+
+// TODO implement str_to_uppercase
+// void str_to_uppercase(str_t*);
 
 #endif /* __STR_H__ */
