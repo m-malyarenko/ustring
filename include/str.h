@@ -22,7 +22,7 @@
 /**
  * @struct String type
  */
-typedef struct str_t str_t;
+typedef struct __str str_t;
 
 /**
  * @brief Creates new instance of string.
@@ -47,7 +47,7 @@ str_t* str_new(const char* string);
  * @note If capacity is set to 0 no memory allocation
  *      is performed, string buffer is empty
  */
-str_t* str_with_capacity(const size_t capacity);
+str_t* str_with_capacity(size_t capacity);
 
 /**
  * @brief Creates copy of the string.
@@ -128,11 +128,10 @@ const char* str_as_ptr(const str_t* self);
  * 
  * @param self Pointer to the string instance, which will be altered
  * @param string Null-terminated string literal with valid ASCII characters
- * @return Pointer to the @c self string instance
+ * @return void
  * @note Function does nothing to @c self if @c string is @c NULL or empty
  */
-str_t* str_append(str_t* self, const char* string);
-// TODO str_t* -> void
+void str_append(str_t* self, const char* string);
 
 /**
  * @brief Creates new string which is a result of concatenation of
@@ -151,10 +150,9 @@ str_t* str_concat(const str_t* str_a, const str_t* str_b);
  * symbols if any exitsts. Function has linear complexity @itO(n).
  * 
  * @param self Pointesr to the @c str_t instances
- * @returns Pointer to the altered @c self string
+ * @returns void
  */
-str_t* str_trim(str_t* self);
-// TODO str_t* -> void
+void str_trim(str_t* self);
 
 // TODO implement str_eq
 // bool str_eq(const str_t* a, const str_t* b);

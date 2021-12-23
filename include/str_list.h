@@ -38,7 +38,7 @@ str_list_t* str_list_new();
  * @note If capacity is 0 no memory allocation is performed
  *       and buffer is empty
  */
-str_list_t* str_list_with_capacity(const size_t capacity);
+str_list_t* str_list_with_capacity(size_t capacity);
 
 /**
  * @brief Creates the new copy of the string list.

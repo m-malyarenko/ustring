@@ -18,7 +18,7 @@ str_t* str_new(const char* string) {
         return str_with_capacity(STR_DEFAULT_CAPACITY);
     }
 
-    const size_t len = _str_literal_len(string);
+    const size_t len = __str_literal_len(string);
     size_t cap = STR_DEFAULT_CAPACITY;
 
     while (len >= cap) {
@@ -30,14 +30,14 @@ str_t* str_new(const char* string) {
     self->len = len;
     self->cap = cap;
     for (size_t i = 0; i < len; i++) {
-        self->buffer[i] = _is_ascii(string[i]) ? string[i] : '?';
+        self->buffer[i] = __is_ascii(string[i]) ? string[i] : '?';
     }
     self->buffer[len] = '\0';
 
     return self;
 }
 
-str_t* str_with_capacity(const size_t capacity) {
+str_t* str_with_capacity(size_t capacity) {
     str_t* self = (str_t*) malloc(sizeof(str_t));
     self->len = 0;
     
@@ -117,16 +117,16 @@ const char* str_as_ptr(const str_t* self) {
     return (self->cap == 0) ? NULL : self->buffer; 
 }
 
-str_t* str_append(str_t* self, const char* string) {
+void str_append(str_t* self, const char* string) {
     if (self == NULL) {
-        return NULL;
+        return;
     }
 
-    if ((string == NULL) || (_str_literal_len(string) == 0)) {
-        return self;
+    if ((string == NULL) || (__str_literal_len(string) == 0)) {
+        return;
     }
 
-    const size_t string_len = _str_literal_len(string);
+    const size_t string_len = __str_literal_len(string);
     const size_t new_len = self->len + string_len;
 
     if (new_len >= self->cap) {
@@ -143,12 +143,12 @@ str_t* str_append(str_t* self, const char* string) {
     }
 
     for (size_t i = 0; i < string_len; i++) {
-        self->buffer[self->len + i] = _is_ascii(string[i]) ? string[i] : '?';
+        self->buffer[self->len + i] = __is_ascii(string[i]) ? string[i] : '?';
     }
     self->buffer[new_len] = '\0';
     self->len = new_len;
 
-    return self;
+    return;
 }
 
 str_t* str_concat(const str_t* str_a, const str_t* str_b) {
@@ -199,19 +199,19 @@ str_t* str_concat(const str_t* str_a, const str_t* str_b) {
     return result_str;
 }
 
-str_t* str_trim(str_t* self) {
+void str_trim(str_t* self) {
     if ((self == NULL) || (self->len == 0)) {
-        return self;
+        return;
     }
 
     const char* front_ptr = self->buffer;
     const char* back_ptr = self->buffer + self->len;
 
-    while ((front_ptr != back_ptr) && _is_blank(*front_ptr)) {
+    while ((front_ptr != back_ptr) && __is_blank(*front_ptr)) {
         front_ptr++;
     }
 
-    while ((back_ptr != front_ptr) && _is_blank(*(back_ptr - 1))) {
+    while ((back_ptr != front_ptr) && __is_blank(*(back_ptr - 1))) {
         back_ptr--;
     }
 
@@ -228,11 +228,9 @@ str_t* str_trim(str_t* self) {
     
     self->buffer[new_len] = '\0';
     self->len = new_len;
-
-    return self;
 }
 
-size_t _str_literal_len(const char* string) {
+size_t __str_literal_len(const char* string) {
     if ((string == NULL) || (*string == '\0')) {
         return 0;
     }
@@ -245,8 +243,8 @@ size_t _str_literal_len(const char* string) {
     return len;
 }
 
-bool _str_literal_contains(const char* string, char ch) {
-    const size_t len = _str_literal_len(string);
+bool __str_literal_contains(const char* string, char ch) {
+    const size_t len = __str_literal_len(string);
 
     if ((string == NULL) || (len == 0) || (ch == '\0')) {
         return false;

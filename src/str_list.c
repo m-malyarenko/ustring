@@ -17,7 +17,7 @@ str_list_t* str_list_new() {
     return str_list_with_capacity(STR_LIST_DEFAULT_CAPACITY);
 }
 
-str_list_t* str_list_with_capacity(const size_t capacity) {
+str_list_t* str_list_with_capacity(size_t capacity) {
     str_list_t* self = (str_list_t*) malloc(sizeof(str_list_t));
     self->size = 0;
     

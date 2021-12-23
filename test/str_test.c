@@ -293,9 +293,9 @@ static void _str_literal_len_test() {
     const char* str2 = "";
     const char* str3 = "Hello";
 
-    assert(_str_literal_len(str1) == 0);
-    assert(_str_literal_len(str2) == 0);
-    assert(_str_literal_len(str3) == 5);
+    assert(__str_literal_len(str1) == 0);
+    assert(__str_literal_len(str2) == 0);
+    assert(__str_literal_len(str3) == 5);
 
     test_passed;
 }
@@ -306,12 +306,12 @@ static void _str_literal_contains_test() {
     const char* str3 = "Hello";
     const char* str4 = "qwerty;qwerty?";
 
-    assert(!_str_literal_contains(str1, 'a'));
-    assert(!_str_literal_contains(str2, '\0'));
-    assert(_str_literal_contains(str3, 'e'));
-    assert(_str_literal_contains(str4, ';'));
-    assert(_str_literal_contains(str4, '?'));
-    assert(!_str_literal_contains(str4, 'z'));
+    assert(!__str_literal_contains(str1, 'a'));
+    assert(!__str_literal_contains(str2, '\0'));
+    assert(__str_literal_contains(str3, 'e'));
+    assert(__str_literal_contains(str4, ';'));
+    assert(__str_literal_contains(str4, '?'));
+    assert(!__str_literal_contains(str4, 'z'));
 
     test_passed;
 }
