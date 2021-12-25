@@ -230,6 +230,167 @@ void str_trim(str_t* self) {
     self->len = new_len;
 }
 
+bool str_eq(const str_t* a, const str_t* b) {
+    if ((a == NULL) || (b == NULL)) {
+        return false;
+    }
+
+    const size_t a_len = a->len;
+    const size_t b_len = b->len;
+
+    if (a_len != b_len) {
+        return false;
+    }
+
+    for (size_t i = 0; i < a_len; i++) {
+        if (a->buffer[i] != b->buffer[i]) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+void str_truncate(str_t* self, size_t len) {
+    if (self == NULL) {
+        return;
+    }
+
+    if (self->len > len) {
+        self->buffer[len] = '\0';
+        self->len = len;
+    }
+}
+
+bool str_contains(const str_t* self, const char* pattern) {
+    if ((self == NULL) || (pattern == NULL)) {
+        return false;
+    }
+
+    const size_t pattern_len = __str_literal_len(pattern);
+
+    if (self->len == 0) {
+        /* Empty string contains only empty pattern */
+        return pattern_len == 0;
+    } else if (pattern_len == 0) {
+        /* Non-empty string always contains empty pattern */
+        return true;
+    } else if (pattern_len > self->len) {
+        /* Pattern length can not exceed string length */
+        return false;
+    } else if (pattern_len == 1) {
+        /* If pattern is single character scan string */
+        const char pattern_ch = pattern[0];
+        for (size_t i = 0; i < self->len; i++) {
+            if (self->buffer[i] == pattern_ch) {
+                return true;
+            }
+        }
+    }
+
+    for (size_t i = 0; i < self->len; i++) {
+        if ((i + pattern_len) > self->len) {
+                return false;
+        }
+
+        if (self->buffer[i] == pattern[0]) {
+            for (size_t j = 1; j < pattern_len; j++) {
+                if (self->buffer[++i] != pattern[j]) {
+                    /* Substring failed matching test */
+                    continue;
+                }
+            }
+            
+            /* Substring passed matching test */
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void str_shrink_to_fit(str_t* self) {
+    if ((self == NULL) || (self->cap == 0)) {
+        return;
+    }
+
+    self->buffer = (char*) realloc(self->buffer, sizeof(char) * (self->len + 1));
+}
+
+bool str_starts_with(const str_t* self, const char* pattern) {
+    if ((self == NULL) || (pattern == NULL)) {
+        return false;
+    }
+
+    const size_t pattern_len = __str_literal_len(pattern);
+
+    if (self->len == 0) {
+        /* Empty string starts only with empty pattern */
+        return pattern_len == 0;
+    } else if (pattern_len == 0) {
+        /* Non-empty string always starts with empty pattern */
+        return true;
+    } else if (pattern_len > self->len) {
+        /* Pattern length can not exceed string length */
+        return false;
+    }
+
+    for (size_t i = 0; i < pattern_len; i++) {
+        if (self->buffer[i] != pattern[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool str_ends_with(const str_t* self, const char* pattern) {
+    if ((self == NULL) || (pattern == NULL)) {
+        return false;
+    }
+
+    const size_t pattern_len = __str_literal_len(pattern);
+
+    if (self->len == 0) {
+        /* Empty string ends only with empty pattern */
+        return pattern_len == 0;
+    } else if (pattern_len == 0) {
+        /* Non-empty string always ends with empty pattern */
+        return true;
+    } else if (pattern_len > self->len) {
+        /* Pattern length can not exceed string length */
+        return false;
+    }
+
+    for (size_t i = 0; i < pattern_len; i++) {
+        if (self->buffer[self->len - (i + 1)] != pattern[pattern_len - (i + 1)]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void str_to_lowercase(str_t* self) {
+    if ((self == NULL) || (self->len == 0)) {
+        return;
+    }
+
+    for (size_t i = 0; i < self->len; i++) {
+        self->buffer[i] = __to_lower(self->buffer[i]);
+    }
+}
+
+void str_to_uppercase(str_t* self) {
+    if ((self == NULL) || (self->len == 0)) {
+        return;
+    }
+
+    for (size_t i = 0; i < self->len; i++) {
+        self->buffer[i] = __to_upper(self->buffer[i]);
+    }
+}
+
 size_t __str_literal_len(const char* string) {
     if ((string == NULL) || (*string == '\0')) {
         return 0;
@@ -257,4 +418,16 @@ bool __str_literal_contains(const char* string, char ch) {
     }
 
     return false;
+}
+
+char __to_lower(char ch) {
+    return (__is_letter(ch) && ((unsigned char) (ch) <= 0x5a)) ?
+        ch + ASCII_LETTER_CASE_CODE_SHIFT :
+        ch;
+}
+
+char __to_upper(char ch) {
+    return (__is_letter(ch) && ((unsigned char) (ch) >= 0x61)) ?
+        ch - ASCII_LETTER_CASE_CODE_SHIFT :
+        ch;
 }

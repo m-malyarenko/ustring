@@ -12,6 +12,7 @@
 #define __STR_P_H__
 
 #define STR_DEFAULT_CAPACITY ((size_t) 32)
+#define ASCII_LETTER_CASE_CODE_SHIFT ((char) 32)
 
 struct __str {
     char* buffer;
@@ -44,6 +45,19 @@ struct __str {
 )
 
 /**
+ * @brief Checks if character is a letter.
+ * 
+ * @param ch @c char character
+ * @return @c true if @c ch is a letter; @c false otherwise
+ */
+#define __is_letter(ch) (\
+    (((unsigned char) (ch) >= 0x41)\
+        && ((unsigned char) (ch) <= 0x5A))\
+    || (((unsigned char) (ch) >= 0x61)\
+        && ((unsigned char) (ch) <= 0x7A))\
+)
+
+/**
  * @brief Returns the length of a C string.
  * 
  * Function is one to one analog of the strlen() fuction
@@ -63,5 +77,23 @@ size_t __str_literal_len(const char* string);
  *         @c false otherwise
  */
 bool __str_literal_contains(const char* string, char ch);
+
+/**
+ * @brief Converts ASCII letter character to lower case.
+ * 
+ * @param ch ASCII character
+ * @return lower-case version of the character is exists;
+ *      @c ch itself otherwise 
+ */
+char __to_lower(char ch);
+
+/**
+ * @brief Converts ASCII letter character to upper case.
+ * 
+ * @param ch ASCII character
+ * @return upper-case version of the character is exists;
+ *      @c ch itself otherwise 
+ */
+char __to_upper(char ch);
 
 #endif /* __STR_P_H__ */

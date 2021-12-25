@@ -132,6 +132,7 @@ const char* str_as_ptr(const str_t* self);
  * @note Function does nothing to @c self if @c string is @c NULL or empty
  */
 void str_append(str_t* self, const char* string);
+// FIXME void -> str_t* to have ability to chain functions
 
 /**
  * @brief Creates new string which is a result of concatenation of
@@ -154,14 +155,28 @@ str_t* str_concat(const str_t* str_a, const str_t* str_b);
  */
 void str_trim(str_t* self);
 
-// TODO implement str_eq
-// bool str_eq(const str_t* a, const str_t* b);
+/**
+ * @brief Compares two strings.
+ * 
+ * @param a,b Pointers to the string instances
+ * @returns @c true if strings are equal; @c false otherwise.
+ *      If one of strings is @c NULL @c false is returned
+ */
+bool str_eq(const str_t* a, const str_t* b);
 
-// TODO implement str_truncate
-// void str_truncate(str_t* self, size_t len);
+/**
+ * @brief Truncates the string to the given length.
+ * 
+ * Function shortens the string to the given length
+ * keeping the beginning of it. If @c len is greater then
+ * 
+ * @param a,b Pointers to the string instances
+ * @returns @c true if strings are equal; @c false otherwise.
+ *      If one of strings is @c NULL @c false is returned
+ */
+void str_truncate(str_t* self, size_t len);
 
-// TODO implement str_contains
-// bool str_contains(const str_t* self, const char* pattern);
+bool str_contains(const str_t* self, const char* pattern);
 
 // TODO implement str_trim_matches
 // void str_trim_matches(str_t* self, const char* pattern);
@@ -178,19 +193,66 @@ void str_trim(str_t* self);
 // TODO implement str_replacen
 // void str_replacen(str_t* self, const char* pattern, const char* replacement, size_t n);
 
-// TODO implement str_shrink_to_fit
-// void str_shrink_to_fit(str_t* self);
+/**
+ * @brief Shrinks string buffer to fit its content.
+ * 
+ * Function truncates the buffer of the string so it occupies
+ * only necessary amount of memory to hold string content.
+ * If @c self is @c NULL or string buffer was not allocated
+ * ( e.g. after @c str_with_capacity(0) ) function does nothing.
+ * 
+ * @param self Pointer to the string instance
+ * @returns void
+ */
+void str_shrink_to_fit(str_t* self);
 
-// TODO implement str_starts_with
-// bool str_starts_with(const str_t* self, const char* pattern);
 
-// TODO implement str_ends_with
-// bool str_ends_with(const str_t* self, const char* pattern);
+/**
+ * @brief Checks if string starts with pattern.
+ * 
+ * Function checks if string matches the pattern (substring)
+ * from the start. Every string begins with an empty pattern: @c "" .
+ * 
+ * @param self Pointer to the string instance
+ * @param pattern Null-terminated byte string
+ * @return @c true if string starts with @c pattern;
+ *      @c false otherwise
+ */
+bool str_starts_with(const str_t* self, const char* pattern);
 
-// TODO implement str_to_lowercase
-// void str_to_lowercase(str_t* slef);
+/**
+ * @brief Checks if string ends with pattern.
+ * 
+ * Function checks if string matches the pattern (substring)
+ * at the end. Every string ends with an empty pattern: @c "" .
+ * 
+ * @param self Pointer to the string instance
+ * @param pattern Null-terminated byte string
+ * @return @c true if string ends with @c pattern;
+ *      @c false otherwise
+ */
+bool str_ends_with(const str_t* self, const char* pattern);
 
-// TODO implement str_to_uppercase
-// void str_to_uppercase(str_t*);
+/**
+ * @brief Converts string to lower case.
+ * 
+ * Function converts all ASCII letter characters
+ * in the string to lower case. 
+ * 
+ * @param self Pointer to the string instance, which will be altered
+ * @return void
+ */
+void str_to_lowercase(str_t* self);
+
+/**
+ * @brief Converts string to upper case.
+ * 
+ * Function converts all ASCII letter characters
+ * in the string to upper case. 
+ * 
+ * @param self Pointer to the string instance, which will be altered
+ * @return void
+ */
+void str_to_uppercase(str_t* self);
 
 #endif /* __STR_H__ */
