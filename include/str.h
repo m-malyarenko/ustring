@@ -125,14 +125,13 @@ const char* str_as_ptr(const str_t* self);
  * 
  * Function changes the first string by adding all characters of
  * the second string to it. Second string stays unchanged.
+ * Function does nothing to @c self if @c string is @c NULL or empty
  * 
  * @param self Pointer to the string instance, which will be altered
  * @param string Null-terminated string literal with valid ASCII characters
- * @return void
- * @note Function does nothing to @c self if @c string is @c NULL or empty
+ * @return Pointer to @c self
  */
-void str_append(str_t* self, const char* string);
-// FIXME void -> str_t* to have ability to chain functions
+str_t* str_append(str_t* self, const char* string);
 
 /**
  * @brief Creates new string which is a result of concatenation of

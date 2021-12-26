@@ -117,16 +117,13 @@ const char* str_as_ptr(const str_t* self) {
     return (self->cap == 0) ? NULL : self->buffer; 
 }
 
-void str_append(str_t* self, const char* string) {
-    if (self == NULL) {
-        return;
-    }
-
-    if ((string == NULL) || (__str_literal_len(string) == 0)) {
-        return;
-    }
-
+str_t* str_append(str_t* self, const char* string) {
     const size_t string_len = __str_literal_len(string);
+
+    if ((self == NULL) || (string_len == 0)) {
+        return self;
+    }
+
     const size_t new_len = self->len + string_len;
 
     if (new_len >= self->cap) {
@@ -148,7 +145,7 @@ void str_append(str_t* self, const char* string) {
     self->buffer[new_len] = '\0';
     self->len = new_len;
 
-    return;
+    return self;
 }
 
 str_t* str_concat(const str_t* str_a, const str_t* str_b) {
