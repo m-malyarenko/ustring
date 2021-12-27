@@ -84,11 +84,8 @@ void str_drop(str_t** self) {
 
     if ((*self)->buffer != NULL) {
         free((*self)->buffer);
-        (*self)->buffer = NULL;
     }
 
-    (*self)->cap = 0;
-    (*self)->len = 0;
     *self = NULL;
 }
 
