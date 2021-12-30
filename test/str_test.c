@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include "utest.h"
+#include "test_env.h"
 
 #include "../src/str.c"
 
