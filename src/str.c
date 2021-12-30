@@ -303,6 +303,75 @@ bool str_contains(const str_t* self, const char* pattern) {
     return false;
 }
 
+void str_trim_matches(str_t* self, const char* pattern) {
+    if ((self == NULL) || (pattern == NULL) || (self->len == 0)) {
+        return;
+    }
+
+    const size_t pattern_len = __str_literal_len(pattern);
+
+    if (pattern_len == 0) {
+        return;
+    }
+
+    char* new_buffer = (char*) malloc(sizeof(char) * self->len + 1);
+    size_t new_buffer_idx = 0;
+
+    for (size_t i = 0; i < self->len; i++) {
+        if (self->buffer[i] != pattern[0]) {
+        }
+    }
+    
+}
+
+void str_trim_matches_fn(str_t* self, bool (*fn) (char)) {
+    if ((self == NULL) || (fn == NULL) || (self->len == 0)) {
+        return;
+    }
+
+    char* new_buffer = (char*) malloc(sizeof(char) * self->len + 1);
+    size_t new_buffer_idx = 0;
+
+    for (size_t i = 0; i < self->len; i++) {
+        if (fn(self->buffer[i])) {
+            new_buffer[new_buffer_idx++] = self->buffer[i];
+        }
+    }
+
+    new_buffer[new_buffer_idx] = '\0';
+    free(self->buffer);
+    self->buffer = new_buffer;
+    self->len = new_buffer_idx;
+}
+
+void str_trim_start_matches_fn(str_t* self, bool (*fn) (char)) {
+    if ((self == NULL) || (fn == NULL) || (self->len == 0)) {
+        return;
+    }
+
+    size_t start_idx = 0;
+    while (fn(self->buffer[start_idx]) && (start_idx < self->len)) {
+        start_idx++;
+    }
+    
+    if (start_idx == 0) {
+        return;
+    }
+
+    if (start_idx == (self->len - 1)) {
+        self->buffer[0] = '\0';
+        self->len = 0;
+        return;
+    }
+
+    for (size_t i = 0; i < (self->len - start_idx); i++) {
+        self->buffer[i] = self->buffer[start_idx + i];
+    }
+
+    self->len = self->len - start_idx;
+    self->buffer[self->len] = '\0';
+}
+
 void str_shrink_to_fit(str_t* self) {
     if ((self == NULL) || (self->cap == 0)) {
         return;

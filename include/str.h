@@ -178,19 +178,26 @@ void str_truncate(str_t* self, size_t len);
 bool str_contains(const str_t* self, const char* pattern);
 
 // TODO implement str_trim_matches
-// void str_trim_matches(str_t* self, const char* pattern);
+void str_trim_matches(str_t* self, const char* pattern);
+
+void str_trim_matches_fn(str_t* self, bool (*fn) (char));
 
 // TODO implement str_trim_start_matches
-// void str_trim_start_matches(str_t* self, const char* pattern);
+void str_trim_start_matches(str_t* self, const char* pattern);
+
+void str_trim_start_matches_fn(str_t* self, bool (*fn) (char));
 
 // TODO implement str_trim_end_matches
-// void str_trim_end_matches(str_t* self, const char* pattern);
+void str_trim_end_matches(str_t* self, const char* pattern);
+
+// TODO implement str_trim_end_matches_fn
+void str_trim_end_matches(str_t* self, bool (*fn) (char));
 
 // TODO implement str_replace
-// void str_replace(str_t* self, const char* pattern, const char* replacement);
+void str_replace(str_t* self, const char* pattern, const char* replacement);
 
 // TODO implement str_replacen
-// void str_replacen(str_t* self, const char* pattern, const char* replacement, size_t n);
+void str_replacen(str_t* self, const char* pattern, const char* replacement, size_t n);
 
 /**
  * @brief Shrinks string buffer to fit its content.
