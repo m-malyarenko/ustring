@@ -1,6 +1,6 @@
-#include <string.h>
+#include "test_env.h"
 
-#include "utest.h"
+#include <string.h>
 
 #include "../src/str_list.c"
 #include "../src/str.c"
@@ -13,8 +13,6 @@ static void str_list_new_test() {
     assert(list->buffer != NULL);
 
     str_list_drop(list);
-
-    test_passed;
 }
 
 static void str_list_with_capacity_test() {
@@ -25,8 +23,6 @@ static void str_list_with_capacity_test() {
     assert(list->buffer != NULL);
 
     str_list_drop(list);
-
-    test_passed;
 }
 
 static void str_list_drop_test() {
@@ -40,8 +36,6 @@ static void str_list_drop_test() {
     assert(list->buffer == NULL);
     assert(list->size == 0);
     assert(list->cap == 0);
-
-    test_passed;
 }
 
 static void str_list_push_test() {
@@ -57,7 +51,6 @@ static void str_list_push_test() {
     assert(strcmp(str_as_ptr(str_list_at(list, 2)), "Three") == 0);
 
     str_list_drop(list);
-    test_passed;
 }
 
 static void str_list_pop_test() {
@@ -94,8 +87,6 @@ static void str_list_pop_test() {
     assert(string == NULL);
 
     str_list_drop(list);
-
-    test_passed;
 }
 
 static void str_list_size_test() {
@@ -119,8 +110,6 @@ static void str_list_size_test() {
     assert(str_list_size(list) == 3);
 
     str_list_drop(list);
-
-    test_passed;
 }
 
 static void str_list_cap_test() {
@@ -137,8 +126,6 @@ static void str_list_cap_test() {
 
     str_list_drop(list1);
     str_list_drop(list2);
-
-    test_passed;
 }
 
 static void str_list_is_empty_test() {
@@ -153,8 +140,6 @@ static void str_list_is_empty_test() {
     assert(str_list_is_empty(NULL));
 
     str_list_drop(list);
-
-    test_passed;
 }
 
 static void str_list_at_test() {
@@ -172,8 +157,6 @@ static void str_list_at_test() {
     assert(str_list_at(list, 4) == NULL);
 
     str_list_drop(list);
-
-    test_passed;
 }
 
 static void str_split_test() {
@@ -225,8 +208,6 @@ static void str_split_test() {
     str_drop(str3);
     str_drop(str4);
     str_drop(str5);
-
-    test_passed;
 }
 
 static void str_list_join_test() {
@@ -259,8 +240,6 @@ static void str_list_join_test() {
     str_drop(str2);
     str_drop(str3);
     str_drop(str4);
-
-    test_passed;
 }
 
 int main() {

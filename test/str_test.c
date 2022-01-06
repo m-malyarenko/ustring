@@ -1,6 +1,6 @@
-#include <string.h>
-
 #include "test_env.h"
+
+#include <string.h>
 
 #include "../src/str.c"
 
@@ -21,8 +21,6 @@ static void str_new_test() {
     assert(str_cap(string) == 32);
     assert(str_as_ptr(string) != NULL);
     str_drop(string);
-
-    test_passed;
 }
 
 static void str_with_capacity_test() {
@@ -38,8 +36,6 @@ static void str_with_capacity_test() {
     assert(str_as_ptr(string) == NULL);
 
     str_drop(string);
-
-    test_passed;
 }
 
 static void str_copy_test() {
@@ -61,8 +57,6 @@ static void str_copy_test() {
     assert(str_as_ptr(copy) != NULL);
 
     str_drop(copy );
-
-    test_passed;
 }
 
 static void str_drop_test() {
@@ -71,8 +65,6 @@ static void str_drop_test() {
     assert(str_as_ptr(string) == NULL);
     assert(str_len(string) == 0);
     assert(str_cap(string) == 0);
-
-    test_passed;
 }
 
 static void str_len_test() {
@@ -90,8 +82,6 @@ static void str_len_test() {
     str_drop(str2);
     str_drop(str3);
     str_drop(str4);
-
-    test_passed;
 }
 
 static void str_cap_test() {
@@ -106,8 +96,6 @@ static void str_cap_test() {
     str_drop(str1);
     str_drop(str2);
     str_drop(str3);
-
-    test_passed;
 }
 
 static void str_is_empty_test() {
@@ -131,8 +119,6 @@ static void str_is_empty_test() {
     str_drop(str4);
     str_drop(str5);
     str_drop(str6);
-
-    test_passed;
 }
 
 static void str_at_test() {
@@ -151,8 +137,6 @@ static void str_at_test() {
 
     str_drop(str1);
     str_drop(str2);
-
-    test_passed;
 }
 
 static void str_append_test() {
@@ -184,8 +168,6 @@ static void str_append_test() {
     str_drop(str_a);
     str_drop(str_b);
     str_drop(str_c);
-
-    test_passed;
 }
 
 static void str_concat_test() {
@@ -260,8 +242,6 @@ static void str_concat_test() {
 
     str_drop(str_a);
     str_drop(str_b);
-
-    test_passed;
 }
 
 static void str_trim_test() {
@@ -271,12 +251,21 @@ static void str_trim_test() {
     str_t* str4 = str_new("abc abc\t abc\n\t   ");
     str_t* str5 = str_new("  \t\n\t  \v\r   ");
 
-    assert(strcmp(str_as_ptr(str_trim(str1)), "") == 0);
+    str_trim(str1);
+    assert(strcmp(str_as_ptr(str1), "") == 0);
     assert(str_is_empty(str1));
-    assert(strcmp(str_as_ptr(str_trim(str2)), "abc") == 0);
-    assert(strcmp(str_as_ptr(str_trim(str3)), "abc") == 0);
-    assert(strcmp(str_as_ptr(str_trim(str4)), "abc abc\t abc") == 0);
-    assert(strcmp(str_as_ptr(str_trim(str5)), "") == 0);
+
+    str_trim(str2);
+    assert(strcmp(str_as_ptr(str2), "abc") == 0);
+
+    str_trim(str3);
+    assert(strcmp(str_as_ptr(str3), "abc") == 0);
+
+    str_trim(str4);
+    assert(strcmp(str_as_ptr(str4), "abc abc\t abc") == 0);
+
+    str_trim(str5);
+    assert(strcmp(str_as_ptr(str5), "") == 0);
     assert(str_is_empty(str5));
 
     str_drop(str1);
@@ -284,8 +273,6 @@ static void str_trim_test() {
     str_drop(str3);
     str_drop(str4);
     str_drop(str5);
-
-    test_passed;
 }
 
 static void _str_literal_len_test() {
@@ -296,8 +283,6 @@ static void _str_literal_len_test() {
     assert(__str_literal_len(str1) == 0);
     assert(__str_literal_len(str2) == 0);
     assert(__str_literal_len(str3) == 5);
-
-    test_passed;
 }
 
 static void _str_literal_contains_test() {
@@ -312,8 +297,6 @@ static void _str_literal_contains_test() {
     assert(__str_literal_contains(str4, ';'));
     assert(__str_literal_contains(str4, '?'));
     assert(!__str_literal_contains(str4, 'z'));
-
-    test_passed;
 }
 
 int main() {
