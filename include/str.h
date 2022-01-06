@@ -52,7 +52,7 @@ str_t* str_with_capacity(size_t capacity);
 /**
  * @brief Creates copy of the string.
  * 
- * @param other String instance to be copied
+ * @param other Pointer to the initialized string instance to be copied
  * @return Pointer to the new instance of string which is
  *      a copy of the given string;
  *      If given pointer is @c NULL returns an empty string
@@ -82,6 +82,7 @@ size_t str_len(const str_t* self);
 /**
  * @brief Returns the capacity of the string buffer.
  * 
+ * @param self Pointer to the initialised string instance
  * @return Capacity of the string's buffer;
  *      If @c self is @c NULL 0 is returned
  */
@@ -115,7 +116,7 @@ char str_at(const str_t* self, const size_t pos);
  * so pointer to the string buffer may be used as
  * normal @c const @c char* string literal.
  * 
- * @param self Pointer to the string instance
+ * @param self Pointer to the initialised string instance
  * @return Pointer to the @c self buffer; @c NULL if @c self is @c NULL
  */
 const char* str_as_ptr(const str_t* self);
@@ -123,8 +124,8 @@ const char* str_as_ptr(const str_t* self);
 /**
  * @brief Appends one string to the end of another string.
  * 
- * Function changes the first string by adding all characters of
- * the second string to it. Second string stays unchanged.
+ * Function changes the @c self string by adding all characters of
+ * the provided @c string to it. Second string stays unchanged.
  * Function does nothing to @c self if @c string is @c NULL or empty
  * 
  * @param self Pointer to the string instance, which will be altered
@@ -137,7 +138,7 @@ str_t* str_append(str_t* self, const char* string);
  * @brief Creates new string which is a result of concatenation of
  * the given strings.
  * 
- * @param str_a,str_b Pointers to the string instances
+ * @param str_a,str_b Pointers to the initialized string instances
  * @return Pointer to the new string instance - a result
  *      of concatenation of the given strings
  */
@@ -146,8 +147,8 @@ str_t* str_concat(const str_t* str_a, const str_t* str_b);
 /**
  * @brief Trims leading and trailing whitespace characters in the string.
  * 
- * Trims leading and trailing @b space, @b h-tab, @b v-tab, @b newline
- * symbols if any exitsts. Function has linear complexity @itO(n).
+ * Trims leading and trailing @b space (' '), @b h-tab (\t),
+ * @b v-tab (\v), @b newline (\n) symbols if any exitsts.
  * 
  * @param self Pointesr to the @c str_t instances
  * @returns void
@@ -157,7 +158,7 @@ void str_trim(str_t* self);
 /**
  * @brief Compares two strings.
  * 
- * @param a,b Pointers to the string instances
+ * @param a,b Pointers to the initialized string instances
  * @returns @c true if strings are equal; @c false otherwise.
  *      If one of strings is @c NULL @c false is returned
  */
@@ -167,7 +168,8 @@ bool str_eq(const str_t* a, const str_t* b);
  * @brief Truncates the string to the given length.
  * 
  * Function shortens the string to the given length
- * keeping the beginning of it. If @c len is greater then
+ * keeping the beginning of it.
+ * Function does nothing if @c len is greater then @c self length.
  * 
  * @param a,b Pointers to the string instances
  * @returns @c true if strings are equal; @c false otherwise.
