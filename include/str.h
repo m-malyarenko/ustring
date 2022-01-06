@@ -20,7 +20,7 @@
 #include <stdbool.h>
 
 /**
- * @struct String type
+ * @typedef String type
  */
 typedef struct __str str_t;
 
@@ -175,29 +175,132 @@ bool str_eq(const str_t* a, const str_t* b);
  */
 void str_truncate(str_t* self, size_t len);
 
+
+/**
+ * @brief Checks if the string contains a string pattern
+ * 
+ * The function checks if the entire pattern is included
+ * in the string at least once.
+ * 
+ * @note Following conventions are used:
+ *      - Empty string contains only empty pattern (zero-length pattern)
+ *      - All strings contains an empty pattern
+ * 
+ * @param self Pointer to the initialised string instance
+ * @param pattern Search pattern - null-terminated byte string
+ *      of valid ASCII characters
+ * @return @c true if the string contains @c pattern;
+ *      @c false otherwise or if @c self is @c NULL or if @c pattern is @c NULL 
+ */
 bool str_contains(const str_t* self, const char* pattern);
 
-// TODO implement str_trim_matches
+/**
+ * @brief Checks if the string contains at least one character of class
+ *      determined by predicate function.
+ * 
+ * Function applies the predicate function to each character
+ * in the string and checks if any character makes predicate function
+ * return @c true 
+ * 
+ * @param self Pointer to the initialised string instance
+ * @param fn Predicate function
+ * @return @c true if the string contains at least one
+ *      character @c ch : @code fn(ch) == true @endcode;
+ *      @c false otherwise or if @c self is @c NULL or if @c fn is @c NULL
+ */
+bool str_contains_fn(const str_t* self, bool (*fn) (char));
+
+/**
+ * @brief Removes all occurrences of the pattern in the string
+ * 
+ * Function removes all occurrences of
+ * the entire pattern in the string with greedy strategy:
+ * string is scanned once from start to end and every time 
+ * pattern occurs it is trimmed. If pattern or @c self string
+ * is empty or @c NULL function does nothing. 
+ * 
+ * @param self Pointer to the initialised string instance
+ * @param pattern Pattern to be removed - null-terminated byte string
+ *      of valid ASCII characters
+ * @return void
+ */
 void str_trim_matches(str_t* self, const char* pattern);
 
+/**
+ * @brief Removes all characters that matches predicate function
+ * 
+ * Function scans the string from start to end, applies provided
+ * predicate function to each character and removes all characters
+ * that matched predicate.
+ * 
+ * @param self Pointer to the initialised string instance
+ * @param fn Predicate function
+ */
 void str_trim_matches_fn(str_t* self, bool (*fn) (char));
 
-// TODO implement str_trim_start_matches
+/**
+ * @brief Removes prefix of the string that matches pattern
+ * 
+ * Function checks if string starts with the pattern
+ * and if it is - matched prefix is removed. 
+ * 
+ * @param self Pointer to the initialised string instance
+ * @param pattern Pattern of prefix to be removed -
+ *      null-terminated byte string of valid ASCII characters
+ */
 void str_trim_start_matches(str_t* self, const char* pattern);
 
+/**
+ * @brief Removes all characters from the start of the string
+ *      that matches the predicate function.
+ * 
+ * Function scans the string from start and removes characters
+ * until they matches predicate function.
+ * 
+ * @param self Pointer to the initialised string instance
+ * @param fn Predicate function
+ */
 void str_trim_start_matches_fn(str_t* self, bool (*fn) (char));
 
-// TODO implement str_trim_end_matches
+/**
+ * @brief Removes suffix of the string that matches pattern
+ * 
+ * Function checks if string ends with the pattern
+ * and if it is - matched suffix is removed. 
+ * 
+ * @param self Pointer to the initialised string instance
+ * @param pattern Pattern of suffix to be removed -
+ *      null-terminated byte string of valid ASCII characters
+ */
 void str_trim_end_matches(str_t* self, const char* pattern);
 
-// TODO implement str_trim_end_matches_fn
-void str_trim_end_matches(str_t* self, bool (*fn) (char));
+/**
+ * @brief Removes all characters from the end of the string
+ *      that matches the predicate function.
+ * 
+ * Function scans the string from end and removes characters
+ * until they matches predicate function.
+ * 
+ * @param self Pointer to the initialised string instance
+ * @param fn Predicate function
+ */
+void str_trim_end_matches_fn(str_t* self, bool (*fn) (char));
 
-// TODO implement str_replace
+/**
+ * @brief Replaces all occurrences of the pattern with the
+ *      provided replacement substring
+ * 
+ * Function scans through string from start to end. If entire
+ * pattern occurrence is detected it is replaced with provided
+ * substring. Function uses greedy strategy and do not support
+ * recursive replacement.  
+ * 
+ * @param self Pointer to the initialised string instance
+ * @param pattern Pattern to be replaced
+ * @param replacement Substring to be inserted in the string
+ *      replacing pattern. 
+ */
 void str_replace(str_t* self, const char* pattern, const char* replacement);
-
-// TODO implement str_replacen
-void str_replacen(str_t* self, const char* pattern, const char* replacement, size_t n);
 
 /**
  * @brief Shrinks string buffer to fit its content.

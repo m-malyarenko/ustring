@@ -280,24 +280,38 @@ bool str_contains(const str_t* self, const char* pattern) {
                 return true;
             }
         }
+        return false;
     }
 
     for (size_t i = 0; i < self->len; i++) {
         if ((i + pattern_len) > self->len) {
-                return false;
+            return false;
         }
 
-        if (self->buffer[i] == pattern[0]) {
-            for (size_t j = 1; j < pattern_len; j++) {
-                if (self->buffer[++i] != pattern[j]) {
-                    /* Substring failed matching test */
-                    continue;
-                }
-            }
-            
-            /* Substring passed matching test */
+        size_t matched_count = 0;
+        while ((matched_count < pattern_len)
+                    && (self->buffer[i + matched_count] == pattern[matched_count]))
+        {
+            matched_count++;
+        }
+
+        if (matched_count == pattern_len) {
             return true;
         }
+    }
+
+    return false;
+}
+
+bool str_contains_fn(const str_t* self, bool (*fn) (char)) {
+    if ((self == NULL) || (self->len == 0)) {
+        return false;
+    }
+
+    for (size_t i = 0; i < self->len; i++) {
+        if (fn(self->buffer[i])) {
+            return true;
+        } 
     }
 
     return false;
@@ -310,18 +324,63 @@ void str_trim_matches(str_t* self, const char* pattern) {
 
     const size_t pattern_len = __str_literal_len(pattern);
 
-    if (pattern_len == 0) {
+    if ((pattern_len == 0) || (pattern_len > self->len)) {
         return;
     }
 
-    char* new_buffer = (char*) malloc(sizeof(char) * self->len + 1);
-    size_t new_buffer_idx = 0;
+    /* Find first appearance of the pattern in the string */
+    size_t write_idx = 0; // Current index to be written during operation
+    while ((write_idx + pattern_len) <= self->len) {
+        size_t matched_count = 0;
+        while ((matched_count < pattern_len)
+                    && (self->buffer[write_idx + matched_count] == pattern[matched_count]))
+        {
+            matched_count++;
+        }
 
-    for (size_t i = 0; i < self->len; i++) {
-        if (self->buffer[i] != pattern[0]) {
+        if (matched_count == pattern_len) {
+            break;
+        } else {
+            write_idx++;
         }
     }
+
+    size_t read_idx = write_idx + pattern_len; // Current index to be read during operation
+
+    if (read_idx > self->len) {
+        /* String does not contain pattern */
+        return;
+    }
     
+    if (read_idx == self->len) {
+        /* Pattern is in the very end of the string */
+        self->buffer[write_idx] = '\0';
+        self->len = self->len - pattern_len;
+        return;
+    }
+
+    /* Trim all occurrences of the pattern and shift string contents */
+    while (read_idx < self->len) {
+        /* Check if pattern is present */
+        if ((read_idx + pattern_len) <= self->len) {
+            size_t matched_count = 0;
+            while ((matched_count < pattern_len)
+                        && (self->buffer[read_idx + matched_count] == pattern[matched_count]))
+            {
+                matched_count++;
+            }
+
+            if (matched_count == pattern_len) {
+                read_idx += pattern_len;
+                continue;
+            }
+        }
+
+        self->buffer[write_idx++] = self->buffer[read_idx++];
+    }
+
+    self->buffer[write_idx] = '\0';
+    self->len = write_idx;
 }
 
 void str_trim_matches_fn(str_t* self, bool (*fn) (char)) {
@@ -329,19 +388,61 @@ void str_trim_matches_fn(str_t* self, bool (*fn) (char)) {
         return;
     }
 
-    char* new_buffer = (char*) malloc(sizeof(char) * self->len + 1);
-    size_t new_buffer_idx = 0;
+    /* Search through string for the first fn match occurrence */
+    size_t write_idx = 0;
+    while ((write_idx < self->len) && !fn(self->buffer[write_idx])) {
+        write_idx++;
+    }
 
-    for (size_t i = 0; i < self->len; i++) {
+    if (write_idx == self->len) {
+        /* No fn match detected */
+        return;
+    }
+    
+    /* Trim matched characters & shift string contents to the left */
+    for (size_t i = write_idx + 1; i < self->len; i++) {
         if (fn(self->buffer[i])) {
-            new_buffer[new_buffer_idx++] = self->buffer[i];
+            self->buffer[write_idx++] = self->buffer[i];
         }
     }
 
-    new_buffer[new_buffer_idx] = '\0';
-    free(self->buffer);
-    self->buffer = new_buffer;
-    self->len = new_buffer_idx;
+    self->buffer[write_idx] = '\0';
+    self->len = write_idx;
+}
+
+void str_trim_start_matches(str_t* self, const char* pattern) {
+    if ((self == NULL) || (pattern == NULL) || (self->len == 0)) {
+        return;
+    }
+
+    const size_t pattern_len = __str_literal_len(pattern);
+
+    if ((pattern_len == 0) || (pattern_len > self->len)) {
+        return;
+    }
+
+    /* Check if string starts with pattern */
+    for (size_t i = 0; i < pattern_len; i++) {
+        if (self->buffer[i] != pattern[i]) {
+            return;
+        }
+    }
+
+    if (pattern_len == self->len) {
+        self->buffer[0] = '\0';
+        self->len = 0;
+        return;
+    }
+
+    const size_t new_len = self->len - pattern_len;
+
+    /* Shift rest of the string to the beginning */
+    for (size_t i = 0; i < new_len; i++) {
+        self->buffer[i] = self->buffer[i + pattern_len];
+    }
+
+    self->buffer[new_len] = '\0';
+    self->len = new_len;
 }
 
 void str_trim_start_matches_fn(str_t* self, bool (*fn) (char)) {
@@ -364,12 +465,134 @@ void str_trim_start_matches_fn(str_t* self, bool (*fn) (char)) {
         return;
     }
 
-    for (size_t i = 0; i < (self->len - start_idx); i++) {
+    const size_t new_len = self->len - start_idx;
+
+    /* Shift rest of the string to the beginning */
+    for (size_t i = 0; i < new_len; i++) {
         self->buffer[i] = self->buffer[start_idx + i];
     }
 
-    self->len = self->len - start_idx;
-    self->buffer[self->len] = '\0';
+    self->buffer[new_len] = '\0';
+    self->len = new_len;
+}
+
+void str_trim_end_matches(str_t* self, const char* pattern) {
+    if ((self == NULL) || (pattern == NULL) || (self->len == 0)) {
+        return;
+    }
+
+    const size_t pattern_len = __str_literal_len(pattern);
+
+    if ((pattern_len == 0) || (pattern_len > self->len)) {
+        return;
+    }
+
+    const size_t match_start_idx = self->len - pattern_len;
+
+    /* Check if string ends with pattern */
+    for (size_t i = 0; i < pattern_len; i++) {
+        if (self->buffer[match_start_idx + i] != pattern[i]) {
+            return;
+        }
+    }
+    
+    /* Truncate matched suffix */
+    self->buffer[match_start_idx] = '\0';
+    self->len = match_start_idx;
+}
+
+void str_trim_end_matches_fn(str_t* self, bool (*fn) (char)) {
+    if ((self == NULL) || (fn == NULL) || (self->len == 0)) {
+        return;
+    }
+
+    size_t match_start_idx = self->len;
+    while ((match_start_idx > 0) && fn(self->buffer[match_start_idx - 1])) {
+        match_start_idx--;
+    }
+
+    self->buffer[match_start_idx] = '\0';
+    self->len = match_start_idx; 
+}
+
+void str_replace(str_t* self, const char* pattern, const char* replacement) {
+    if ((self == NULL) || (pattern == NULL) || (self->len == 0)) {
+        return;
+    }
+
+    const size_t pattern_len = __str_literal_len(pattern);
+    if ((pattern_len == 0) || !str_contains(self, pattern)) {
+        return;
+    }
+
+    const size_t replacement_len = __str_literal_len(replacement);
+    if (replacement_len == 0) {
+        str_trim_matches(self, pattern);
+        return;
+    }
+
+    /* Normalize replacement string */
+    char* replacement_norm = (char*) malloc(sizeof(char) * replacement_len + 1);
+    for (size_t i = 0; i < replacement_len; i++) {
+        replacement_norm[i] = __is_ascii(replacement[i]) ? replacement[i] : '?';
+    }
+    replacement_norm[replacement_len] = '\0';
+
+    /* Create new string buffer */
+    size_t new_cap = self->cap;
+    char* new_buffer = (char*) malloc(sizeof(char) * new_cap);
+
+    size_t read_idx = 0;
+    size_t write_idx = 0;
+
+    while (read_idx < self->len) {
+        /* Detect pattern */
+        bool is_replacement = false;
+        if (read_idx + pattern_len <= self->len) {
+            size_t matched_count = 0;
+            while ((matched_count < pattern_len)
+                        && (self->buffer[read_idx + matched_count] == pattern[matched_count]))
+            {
+                matched_count++;
+            }
+
+            if (matched_count == pattern_len) {
+                is_replacement = true;
+                read_idx += pattern_len;
+            }
+        }
+
+        if (is_replacement) {
+            /* Write replacement to the buffer */
+            const size_t current_len = write_idx + replacement_len;
+            if (current_len >= new_cap) {
+                while (current_len >= new_cap) {
+                    new_cap *= 2;
+                }
+                new_buffer = (char*) realloc(new_buffer, sizeof(char) * new_cap);
+            }
+            for (size_t i = 0; i < replacement_len; i++) {
+                new_buffer[write_idx + i] = replacement[i];
+            }
+            read_idx += pattern_len;
+            write_idx += replacement_len;
+        } else {
+            /* Write character to the buffer */
+            if (write_idx == new_cap) {
+                new_cap *= 2;
+                new_buffer = (char*) realloc(new_buffer, sizeof(char) * new_cap);
+            }
+            new_buffer[write_idx++] = self->buffer[read_idx++];
+        }
+    }
+    new_buffer[write_idx] = '\0';
+
+    free(self->buffer);
+    free(replacement_norm);
+
+    self->buffer = new_buffer;
+    self->cap = new_cap;
+    self->len = write_idx;
 }
 
 void str_shrink_to_fit(str_t* self) {
@@ -425,8 +648,10 @@ bool str_ends_with(const str_t* self, const char* pattern) {
         return false;
     }
 
+    const size_t pattern_start_idx = self->len - pattern_len;
+
     for (size_t i = 0; i < pattern_len; i++) {
-        if (self->buffer[self->len - (i + 1)] != pattern[pattern_len - (i + 1)]) {
+        if (self->buffer[pattern_start_idx + i] != pattern[i]) {
             return false;
         }
     }
