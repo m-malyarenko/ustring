@@ -11,14 +11,12 @@
 #ifndef __STR_LIST_P_H__
 #define __STR_LIST_P_H__
 
-#include <stdbool.h>
-
 #include "str_p.h"
 
 #define STR_LIST_DEFAULT_CAPACITY ((size_t) 32)
 
-struct str_list_t {
-    struct str_t** buffer;
+struct __str_list {
+    str_t** buffer;
     size_t size;
     size_t cap;
 };

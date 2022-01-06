@@ -21,7 +21,7 @@
 /**
  * @struct String List type
  */
-typedef struct str_list_t str_list_t;
+typedef struct __str_list str_list_t;
 
 /**
  * @brief Creates new instance of an empty string list with default capacity.

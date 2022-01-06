@@ -127,7 +127,7 @@ str_list_t* str_split(const str_t* self, const char* delim) {
         return str_list_new();
     }
 
-    if ((delim == NULL) || (_str_literal_len(delim) == 0)) {
+    if ((delim == NULL) || (__str_literal_len(delim) == 0)) {
         str_list_t* new_list = str_list_new();
         str_list_push(new_list, str_copy(self));
         return new_list;
@@ -141,13 +141,13 @@ str_list_t* str_split(const str_t* self, const char* delim) {
     const char* back_ptr = NULL;
 
     while (front_ptr != bound_back) {
-        while (_str_literal_contains(delim, *front_ptr) && (front_ptr != bound_back)) {
+        while (__str_literal_contains(delim, *front_ptr) && (front_ptr != bound_back)) {
             front_ptr++;
         }
 
         back_ptr = front_ptr;
 
-        while (!_str_literal_contains(delim, *back_ptr) && (back_ptr != bound_back)) {
+        while (!__str_literal_contains(delim, *back_ptr) && (back_ptr != bound_back)) {
             back_ptr++;
         }
 
@@ -173,7 +173,7 @@ str_t* str_list_join(const str_list_t* self, const char* delim) {
         return str_new(NULL);
     }
 
-    const size_t delim_len = _str_literal_len(delim);
+    const size_t delim_len = __str_literal_len(delim);
     size_t total_len = delim_len * (self->size - 1);
 
     for (size_t i = 0; i < self->size; i++) {
