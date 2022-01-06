@@ -28,10 +28,10 @@ struct __str {
  * line feed (0x0a), carriage return (0x0d), horizontal tab (0x09) 
  * or vertical tab (0x0b); @c false otherwise
  */
-#define __is_blank(ch) (\
-    ((unsigned char) (ch) == (unsigned char) 0x20)\
-    || (((unsigned char) (ch) >= (unsigned char) 0x09)\
-    && ((unsigned char) (ch) <= (unsigned char) 0x0D))\
+#define __is_blank(ch) (                                                      \
+    ((unsigned char) (ch) == (unsigned char) 0x20)                            \
+        || (((unsigned char) (ch) >= (unsigned char) 0x09)                    \
+            && ((unsigned char) (ch) <= (unsigned char) 0x0D))                \
 )
 
 /**
@@ -40,8 +40,8 @@ struct __str {
  * @param ch @c char character
  * @return @c true if @c ch is valid ASCII character; @c false otherwise
  */
-#define __is_ascii(ch) (\
-    (unsigned char) (ch) <= (unsigned char) 0x7F\
+#define __is_ascii(ch) (                                                      \
+    (unsigned char) (ch) <= (unsigned char) 0x7F                              \
 )
 
 /**
@@ -50,11 +50,11 @@ struct __str {
  * @param ch @c char character
  * @return @c true if @c ch is a letter; @c false otherwise
  */
-#define __is_letter(ch) (\
-    (((unsigned char) (ch) >= 0x41)\
-        && ((unsigned char) (ch) <= 0x5A))\
-    || (((unsigned char) (ch) >= 0x61)\
-        && ((unsigned char) (ch) <= 0x7A))\
+#define __is_letter(ch) (                                                     \
+    (((unsigned char) (ch) >= 0x41)                                           \
+        && ((unsigned char) (ch) <= 0x5A))                                    \
+    || (((unsigned char) (ch) >= 0x61)                                        \
+        && ((unsigned char) (ch) <= 0x7A))                                    \
 )
 
 /**
