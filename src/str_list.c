@@ -190,3 +190,34 @@ str_t* str_list_join(const str_list_t* self, const char* delim) {
 
     return result_str;
 }
+
+str_list_t* str_split_whitespace(const str_t* self) {
+    const char* whitespace_delim = " \t\v\n\r";
+
+    return str_split(self, whitespace_delim);
+}
+
+bool str_list_contains(const str_list_t* self, const str_t* string) {
+    if ((self == NULL)
+            || (string == NULL)
+            || (self->size == 0))
+    {
+        return false;
+    }
+
+    if (string->len == 0) {
+        for (size_t i = 0; i < self->size; i++) {
+            if (self->buffer[i]->len == 0) {
+                return true;
+            }
+        }
+    } else {
+        for (size_t i = 0; i < self->size; i++) {
+            if (str_eq(self->buffer[i], string)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}

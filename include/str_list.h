@@ -168,8 +168,7 @@ str_t* str_list_join(const str_list_t* self, const char* delim);
 // TODO implement str_list_sort
 // void str_list_sort(str_list_t* self, bool asc);
 
-// TODO implement str_split_whitespace
-// str_list_t* str_split_whitespace(const str_t* self);
+str_list_t* str_split_whitespace(const str_t* self);
 
 // TODO implement str_split_once
 // str_list_t* str_split_once(const str_t* self, const char* delim);
@@ -177,7 +176,6 @@ str_t* str_list_join(const str_list_t* self, const char* delim);
 // TODO implement str_rsplit_once
 // str_list_t* str_rsplit_once(const str_t* self, const char* delim);
 
-// TODO implement str_list_contains
-// bool str_list_contains(const str_list_t* self, const str_t* string);
+bool str_list_contains(const str_list_t* self, const str_t* string);
 
 #endif /* __STR_LIST_H__ */
