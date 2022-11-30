@@ -553,7 +553,7 @@ void str_replace(str_t* self, const char* pattern, const char* replacement) {
             while ((matched_count < pattern_len)
                         && (self->buffer[read_idx + matched_count] == pattern[matched_count]))
             {
-                matched_count++;
+                matched_count += 1;
             }
 
             if (matched_count == pattern_len) {
@@ -565,16 +565,18 @@ void str_replace(str_t* self, const char* pattern, const char* replacement) {
         if (is_replacement) {
             /* Write replacement to the buffer */
             const size_t current_len = write_idx + replacement_len;
+
             if (current_len >= new_cap) {
                 while (current_len >= new_cap) {
                     new_cap *= 2;
                 }
                 new_buffer = (char*) realloc(new_buffer, sizeof(char) * new_cap);
             }
+
             for (size_t i = 0; i < replacement_len; i++) {
                 new_buffer[write_idx + i] = replacement[i];
             }
-            read_idx += pattern_len;
+
             write_idx += replacement_len;
         } else {
             /* Write character to the buffer */
@@ -582,9 +584,13 @@ void str_replace(str_t* self, const char* pattern, const char* replacement) {
                 new_cap *= 2;
                 new_buffer = (char*) realloc(new_buffer, sizeof(char) * new_cap);
             }
-            new_buffer[write_idx++] = self->buffer[read_idx++];
+
+            new_buffer[write_idx] = self->buffer[read_idx];
+            write_idx += 1;
+            read_idx += 1;
         }
     }
+
     new_buffer[write_idx] = '\0';
 
     free(self->buffer);
