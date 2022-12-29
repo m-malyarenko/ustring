@@ -1,9 +1,7 @@
-#include "test_env.h"
+#include <criterion/criterion.h>
 
-#include <string.h>
-
-#include "../src/str_list.c"
-#include "../src/str.c"
+#include "../src/str_list_p.h"
+#include "../include/str_list.h"
 
 static void str_list_new_test() {
     str_list_t* list = str_list_new();
