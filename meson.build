@@ -13,6 +13,11 @@ src = [
     'src/str_list.c',
 ]
 
-library('ustring', src,
-    include_directories: inc
+lib = library('ustring', src,
+    include_directories: inc,
+)
+
+dep = declare_dependency(
+    link_with: lib,
+    version: meson.project_version(),
 )
