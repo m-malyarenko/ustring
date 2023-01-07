@@ -11,8 +11,8 @@
  * 
  *****************************************************************************/
 
-#ifndef __STR_LIST_H__
-#define __STR_LIST_H__
+#ifndef __USTRING_STR_LIST_H__
+#define __USTRING_STR_LIST_H__
 
 #include <stdbool.h>
 
@@ -165,17 +165,45 @@ str_list_t* str_split(const str_t* self, const char* delim);
  */
 str_t* str_list_join(const str_list_t* self, const char* delim);
 
-// TODO implement str_list_sort
-// void str_list_sort(str_list_t* self, bool asc);
+/**
+ * @brief Sort string list in lexicographical order
+ * 
+ * Function places contained strings in ascending or desending
+ * lexicographical order based on standart strcmp function.
+ * Locale is not considered.
+ * If @c self is @c NULL, function does nothing.
+ * 
+ * @param self Pointer to the initialised string list
+ * @param asc @c true - sort in ascending order,
+ *      @c false sort in descending order
+ */
+void str_list_sort(str_list_t* self, bool asc);
 
+/**
+ * @brief Same as @c str_split with whitespace characters as separartor
+ * 
+ * Function splits the string into string list by whitespace characters
+ * @b space (' '), @b h-tab (\t), @b v-tab (\v),
+ * @b newline (\n), @b carriage return (\r).
+ * 
+ * @param self Pointer to the initialised string
+ * @return Pointer to new string list containing the resulting
+ *      string chunks. Empty if @c self is @c NULL or
+ *      empty string list.
+ */
 str_list_t* str_split_whitespace(const str_t* self);
 
-// TODO implement str_split_once
-// str_list_t* str_split_once(const str_t* self, const char* delim);
-
-// TODO implement str_rsplit_once
-// str_list_t* str_rsplit_once(const str_t* self, const char* delim);
-
+/**
+ * @brief Checks is string list contains specified string
+ * 
+ * Function compares each element of the string list with
+ * the given string to find a equal match.
+ * 
+ * @param self Pointer to the initialised string list
+ * @param string Pointer to the initialised string to find in list
+ * @return @c true if strling list contains the given string;
+ *      @c false otherwise
+ */
 bool str_list_contains(const str_list_t* self, const str_t* string);
 
-#endif /* __STR_LIST_H__ */
+#endif /* __USTRING_STR_LIST_H__ */

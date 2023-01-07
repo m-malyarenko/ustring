@@ -135,6 +135,15 @@ const char* str_as_ptr(const str_t* self);
 str_t* str_append(str_t* self, const char* string);
 
 /**
+ * @brief Clears contents of the string
+ * 
+ * Function marks string as zero-length keepeng buffer in place.
+ * 
+ * @param self Pointer to the string instance
+ */
+void str_clear(str_t* self);
+
+/**
  * @brief Creates new string which is a result of concatenation of
  * the given strings.
  * 
@@ -148,7 +157,7 @@ str_t* str_concat(const str_t* str_a, const str_t* str_b);
  * @brief Trims leading and trailing whitespace characters in the string.
  * 
  * Trims leading and trailing @b space (' '), @b h-tab (\t),
- * @b v-tab (\v), @b newline (\n) symbols if any exitsts.
+ * @b v-tab (\v), @b newline (\n), @b carriage return (\r) symbols.
  * 
  * @param self Pointesr to the @c str_t instances
  * @returns void
@@ -156,7 +165,7 @@ str_t* str_concat(const str_t* str_a, const str_t* str_b);
 void str_trim(str_t* self);
 
 /**
- * @brief Compares two strings.
+ * @brief Cheks two strings for equality.
  * 
  * @param a,b Pointers to the initialized string instances
  * @returns @c true if strings are equal; @c false otherwise.
@@ -176,7 +185,6 @@ bool str_eq(const str_t* a, const str_t* b);
  *      If one of strings is @c NULL @c false is returned
  */
 void str_truncate(str_t* self, size_t len);
-
 
 /**
  * @brief Checks if the string contains a string pattern
