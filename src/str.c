@@ -10,7 +10,7 @@
 
 #include <stdlib.h>
 
-#include "str.h"
+#include <ustring/str.h>
 #include "str_p.h"
 
 str_t* str_new(const char* string) {   
@@ -41,9 +41,10 @@ str_t* str_with_capacity(size_t capacity) {
     str_t* self = (str_t*) malloc(sizeof(str_t));
     self->len = 0;
     
-    if (capacity == 0) {
-        self->cap = 0;
-        self->buffer = NULL;
+    if (capacity <= 1) {
+        self->cap = 1;
+        self->buffer = malloc(sizeof(char));
+        self->buffer[0] = '\0';
     }
     else {
         self->cap = capacity;
@@ -121,6 +122,18 @@ str_t* str_append(str_t* self, const char* string) {
         return self;
     }
 
+    const bool append_self = string == self->buffer;
+    char* buffer_copy = NULL;
+
+    if (append_self) {
+        char* buffer_copy = malloc((string_len + 1) + sizeof(char));
+        for (size_t i = 0; i < string_len; i++) {
+            buffer_copy[i] = string[i];
+        }
+        buffer_copy[string_len] = '\0';
+        string = buffer_copy;
+    }
+
     const size_t new_len = self->len + string_len;
 
     if (new_len >= self->cap) {
@@ -142,7 +155,22 @@ str_t* str_append(str_t* self, const char* string) {
     self->buffer[new_len] = '\0';
     self->len = new_len;
 
+    if (append_self) {
+        free(buffer_copy);
+    }
+
     return self;
+}
+
+void str_clear(str_t* self) {
+    if (self == NULL) {
+        return;
+    }
+
+    self->len = 0;
+    if (self->cap != 0) {
+        self->buffer[0] = '\0';
+    } 
 }
 
 str_t* str_concat(const str_t* str_a, const str_t* str_b) {
