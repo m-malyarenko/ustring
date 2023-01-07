@@ -7,17 +7,19 @@ project('ustring', 'c',
     ]
 )
 
-inc = include_directories('include')
-src = [
+ustring_inc = include_directories('include')
+ustring_src = [
     'src/str.c',
     'src/str_list.c',
 ]
 
-lib = library('ustring', src,
-    include_directories: inc,
+ustring_lib = library('ustring', ustring_src,
+    include_directories: ustring_inc,
 )
 
 ustring_dep = declare_dependency(
-    link_with: lib,
+    link_with: ustring_lib,
     version: meson.project_version(),
 )
+
+subdir('test')
