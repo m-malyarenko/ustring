@@ -10,7 +10,7 @@
 
 #include <stdlib.h>
 
-#include "str_list.h"
+#include <ustring/str_list.h>
 #include "str_list_p.h"
 
 str_list_t* str_list_new() {

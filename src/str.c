@@ -10,7 +10,7 @@
 
 #include <stdlib.h>
 
-#include "str.h"
+#include <ustring/str.h>
 #include "str_p.h"
 
 str_t* str_new(const char* string) {   
