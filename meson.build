@@ -18,8 +18,9 @@ ustring_lib = library('ustring', ustring_src,
 )
 
 ustring_dep = declare_dependency(
-    link_with: ustring_lib,
     version: meson.project_version(),
+    include_directories: ustring_inc,
+    link_with: ustring_lib,
 )
 
 subdir('test')
