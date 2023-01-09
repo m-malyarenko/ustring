@@ -332,7 +332,7 @@ bool str_contains(const str_t* self, const char* pattern) {
 }
 
 bool str_contains_fn(const str_t* self, bool (*fn) (char)) {
-    if ((self == NULL) || (self->len == 0)) {
+    if ((self == NULL) || (fn == NULL) || (self->len == 0)) {
         return false;
     }
 
