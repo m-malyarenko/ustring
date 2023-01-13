@@ -356,38 +356,10 @@ void str_trim_matches(str_t* self, const char* pattern) {
         return;
     }
 
-    /* Find first appearance of the pattern in the string */
-    size_t write_idx = 0; // Current index to be written during operation
-    while ((write_idx + pattern_len) <= self->len) {
-        size_t matched_count = 0;
-        while ((matched_count < pattern_len)
-                    && (self->buffer[write_idx + matched_count] == pattern[matched_count]))
-        {
-            matched_count++;
-        }
-
-        if (matched_count == pattern_len) {
-            break;
-        } else {
-            write_idx++;
-        }
-    }
-
-    size_t read_idx = write_idx + pattern_len; // Current index to be read during operation
-
-    if (read_idx > self->len) {
-        /* String does not contain pattern */
-        return;
-    }
-    
-    if (read_idx == self->len) {
-        /* Pattern is in the very end of the string */
-        self->buffer[write_idx] = '\0';
-        self->len = self->len - pattern_len;
-        return;
-    }
-
     /* Trim all occurrences of the pattern and shift string contents */
+    size_t write_idx = 0;
+    size_t read_idx = 0;
+
     while (read_idx < self->len) {
         /* Check if pattern is present */
         if ((read_idx + pattern_len) <= self->len) {
@@ -395,7 +367,7 @@ void str_trim_matches(str_t* self, const char* pattern) {
             while ((matched_count < pattern_len)
                         && (self->buffer[read_idx + matched_count] == pattern[matched_count]))
             {
-                matched_count++;
+                matched_count += 1;
             }
 
             if (matched_count == pattern_len) {
@@ -404,7 +376,9 @@ void str_trim_matches(str_t* self, const char* pattern) {
             }
         }
 
-        self->buffer[write_idx++] = self->buffer[read_idx++];
+        self->buffer[write_idx] = self->buffer[read_idx];
+        write_idx += 1;
+        read_idx += 1;
     }
 
     self->buffer[write_idx] = '\0';
@@ -416,22 +390,16 @@ void str_trim_matches_fn(str_t* self, bool (*fn) (char)) {
         return;
     }
 
-    /* Search through string for the first fn match occurrence */
     size_t write_idx = 0;
-    while ((write_idx < self->len) && !fn(self->buffer[write_idx])) {
-        write_idx++;
-    }
+    size_t read_idx = 0;
 
-    if (write_idx == self->len) {
-        /* No fn match detected */
-        return;
-    }
-    
-    /* Trim matched characters & shift string contents to the left */
-    for (size_t i = write_idx + 1; i < self->len; i++) {
-        if (fn(self->buffer[i])) {
-            self->buffer[write_idx++] = self->buffer[i];
+    while (read_idx < self->len) {
+        if (!fn(self->buffer[read_idx])) {
+            self->buffer[write_idx] = self->buffer[read_idx];
+            write_idx += 1;
         }
+
+        read_idx += 1;
     }
 
     self->buffer[write_idx] = '\0';
@@ -456,12 +424,6 @@ void str_trim_start_matches(str_t* self, const char* pattern) {
         }
     }
 
-    if (pattern_len == self->len) {
-        self->buffer[0] = '\0';
-        self->len = 0;
-        return;
-    }
-
     const size_t new_len = self->len - pattern_len;
 
     /* Shift rest of the string to the beginning */
@@ -479,17 +441,11 @@ void str_trim_start_matches_fn(str_t* self, bool (*fn) (char)) {
     }
 
     size_t start_idx = 0;
-    while (fn(self->buffer[start_idx]) && (start_idx < self->len)) {
-        start_idx++;
+    while ((start_idx < self->len) && fn(self->buffer[start_idx])) {
+        start_idx += 1;
     }
     
     if (start_idx == 0) {
-        return;
-    }
-
-    if (start_idx == (self->len - 1)) {
-        self->buffer[0] = '\0';
-        self->len = 0;
         return;
     }
 
@@ -536,7 +492,7 @@ void str_trim_end_matches_fn(str_t* self, bool (*fn) (char)) {
 
     size_t match_start_idx = self->len;
     while ((match_start_idx > 0) && fn(self->buffer[match_start_idx - 1])) {
-        match_start_idx--;
+        match_start_idx -= 1;
     }
 
     self->buffer[match_start_idx] = '\0';
