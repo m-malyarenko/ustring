@@ -1,3 +1,5 @@
+#include <ctype.h>
+
 #include <criterion/criterion.h>
 
 #include <ustring/str.h>
@@ -10,10 +12,22 @@ static str_t* string_empty_a;
 static str_t* string_empty_b;
 static str_t* string_null;
 
+static bool predicate_a(char c) {
+    return (c == 'A') || (c == '&');
+}
+
+static bool predicate_b(char c) {
+    return isdigit(c);
+}
+
+static bool predicate_c(char c) {
+    return isalpha(c);
+}
+
 static void setup(void) {
     string_a = str_new("Pull & Bear");
     string_b = str_new("One Two Three");
-    string_c = str_new("AbCd");
+    string_c = str_new("AbCd12\t&#\n");
     string_empty_a = str_new(NULL);
     string_empty_b = str_new("");
     string_null = NULL;
@@ -65,7 +79,7 @@ Test(str, copy) {
 
     str_drop(&copy);
 
-    copy = str_copy(NULL);
+    copy = str_copy(string_null);
     cr_assert_not_null(copy);
     cr_assert_eq(copy->len, 0);
     cr_assert_eq(copy->cap, STR_DEFAULT_CAPACITY);
@@ -117,12 +131,12 @@ Test(str, concat) {
     str_t* string_a_a = str_concat(string_a, string_a);
     cr_assert_str_eq(string_a_a->buffer, "Pull & BearPull & Bear");
     str_t* string_a_b_c = str_concat(string_a_b, string_c);
-    cr_assert_str_eq(string_a_b_c->buffer, "Pull & BearOne Two ThreeAbCd");
-    str_t* string_b_null = str_concat(string_b, NULL);
+    cr_assert_str_eq(string_a_b_c->buffer, "Pull & BearOne Two ThreeAbCd12\t&#\n");
+    str_t* string_b_null = str_concat(string_b, string_null);
     cr_assert_str_eq(string_b_null->buffer, "One Two Three");
-    str_t* string_null_b = str_concat(NULL, string_b);
+    str_t* string_null_b = str_concat(string_null, string_b);
     cr_assert_str_eq(string_null_b->buffer, "One Two Three");
-    str_t* string_null_null = str_concat(NULL, NULL);
+    str_t* string_null_null = str_concat(string_null, string_null);
     cr_assert_str_eq(string_null_null->buffer, "");
     cr_assert_eq(str_len(string_null_null), 0);
 
@@ -155,71 +169,263 @@ Test(str, trim) {
 Test(str, eq) {
     cr_assert(str_eq(string_a, string_a));
     cr_assert_not(str_eq(string_b, string_a));
-    cr_assert_not(str_eq(string_b, NULL));
-    cr_assert_not(str_eq(NULL, NULL));
-    cr_assert_not(str_eq(NULL, string_b));
+    cr_assert_not(str_eq(string_b, string_null));
+    cr_assert_not(str_eq(string_null, string_null));
+    cr_assert_not(str_eq(string_null, string_b));
 }
 
-// Test(str, truncate) {
+Test(str, truncate) {
+    size_t old_len = string_a->len;
+    str_truncate(string_a, string_a->len + 10);
+    size_t new_len = string_a->len;
+    cr_assert_eq(old_len, new_len);
+    cr_assert_str_eq(string_a->buffer, "Pull & Bear");
 
-// }
+    str_truncate(string_a, 4);
+    cr_assert_eq(string_a->len, 4);
+    cr_assert_str_eq(string_a->buffer, "Pull");
 
-// Test(str, contains) {
+    str_truncate(string_null, 4);
+    cr_assert_null(string_null);
+}
 
-// }
+Test(str, contains) {
+    cr_assert(str_contains(string_a, ""));
+    cr_assert(str_contains(string_empty_a, ""));
+    cr_assert(str_contains(string_b, "One"));
+    cr_assert(str_contains(string_b, "e Two Th"));
+    cr_assert(str_contains(string_b, "ree"));
+    cr_assert_not(str_contains(string_b, "&all"));
+    cr_assert_not(str_contains(string_b, NULL));
+    cr_assert_not(str_contains(NULL, "&all"));
+    cr_assert_not(str_contains(NULL, NULL));
+}
 
-// Test(str, contains_fn) {
+Test(str, contains_fn) {
+    cr_assert(str_contains_fn(string_a, predicate_a));
+    cr_assert_not(str_contains_fn(string_b, predicate_a));
+    cr_assert(str_contains_fn(string_c, predicate_a));
+    cr_assert_not(str_contains_fn(string_a, NULL));
+    cr_assert_not(str_contains_fn(NULL, predicate_a));
+}
 
-// }
+Test(str, trim_matches) {
+    str_t* string_a_1 = str_copy(string_a);
+    str_t* string_a_2 = str_copy(string_a);
 
-// Test(str, trim_matches) {
+    str_trim_matches(string_a, " & ");
+    str_trim_matches(string_a, NULL);
+    cr_assert_str_eq(string_a->buffer, "PullBear");
 
-// }
+    str_trim_matches(string_a_1, "123");
+    str_trim_matches(string_a_1, "ar");
+    str_trim_matches(string_a_1, "ar");
+    str_trim_matches(string_a_1, "Pull & Bear");
+    cr_assert_str_eq(string_a_1->buffer, "Pull & Be");
 
-// Test(str, trim_matches_fn) {
+    str_trim_matches(string_a_2, "Pu");
+    str_trim_matches(string_a_2, "Pu");
+    str_trim_matches(string_a_2, "Pull & Bear");
+    cr_assert_str_eq(string_a_2->buffer, "ll & Bear");
 
-// }
+    str_trim_matches(string_empty_a, "()");
+    cr_assert_str_empty(string_empty_a->buffer);
 
-// Test(str, trim_start_matches) {
+    str_trim_matches(NULL, "CDT");
 
-// }
+    str_drop(&string_a_1);
+    str_drop(&string_a_2);
+}
 
-// Test(str, trim_start_matches_fn) {
+Test(str, trim_matches_fn) {
+    str_trim_matches_fn(string_a, predicate_c);
+    cr_assert_str_eq(string_a->buffer, " & ");
 
-// }
+    str_trim_matches_fn(string_c, predicate_b);
+    cr_assert_str_eq(string_c->buffer, "AbCd\t&#\n");
 
-// Test(str, trim_end_matches) {
+    str_trim_matches_fn(string_b, NULL);
+    cr_assert_str_eq(string_b->buffer, "One Two Three");
 
-// }
+    str_trim_matches_fn(string_empty_a, predicate_a);
+    cr_assert_str_empty(string_empty_a->buffer);
+}
 
-// Test(str, trim_end_matches_fn) {
+Test(str, trim_start_matches) {
+    str_t* string_d = str_new("123 abc89 98");
+    str_t* string_e = str_new("--@\n X + Y");
 
-// }
+    str_trim_start_matches(string_d, "12");
+    cr_assert_str_eq(string_d->buffer, "3 abc89 98");
 
-// Test(str, replace) {
+    str_trim_start_matches(string_d, "abc");
+    str_trim_start_matches(string_d, "");
+    cr_assert_str_eq(string_d->buffer, "3 abc89 98");
 
-// }
+    str_trim_start_matches(string_e, "--@\n ");
+    cr_assert_str_eq(string_e->buffer, "X + Y");
 
-// Test(str, starts_with) {
+    str_trim_start_matches(string_empty_a, "()");
+    cr_assert_str_empty(string_empty_a->buffer);
 
-// }
+    str_trim_start_matches(NULL, "CDT");
 
-// Test(str, ends_with) {
+    str_drop(&string_d);
+    str_drop(&string_e);
+}
 
-// }
+Test(str, trim_start_matches_fn) {
+    str_t* string_d = str_new("123 abc89 98");
 
-// Test(str, to_lowercase) {
+    str_trim_start_matches_fn(string_d, predicate_b);
+    cr_assert_str_eq(string_d->buffer, " abc89 98");
 
-// }
+    str_trim_start_matches_fn(string_d, predicate_b);
+    str_trim_start_matches_fn(string_d, NULL);
+    cr_assert_str_eq(string_d->buffer, " abc89 98");
 
-// Test(str, to_uppercase) {
+    str_trim_start_matches_fn(string_empty_a, predicate_b);
+    cr_assert_str_empty(string_empty_a->buffer);
 
-// }
+    str_trim_start_matches_fn(NULL, predicate_b);
 
-// Test(str, literal_len) {
+    str_drop(&string_d);
+}
 
-// }
+Test(str, trim_end_matches) {
+    str_t* string_d = str_new("123 abc89 98");
+    str_t* string_e = str_new("--@\n X + Y\n");
 
-// Test(str, literal_contains) {
+    str_trim_end_matches(string_d, "9 98");
+    cr_assert_str_eq(string_d->buffer, "123 abc8");
 
-// }
+    str_trim_end_matches(string_d, "9 98");
+    str_trim_end_matches(string_d, "");
+    cr_assert_str_eq(string_d->buffer, "123 abc8");
+
+    str_trim_end_matches(string_e, " + Y\n");
+    cr_assert_str_eq(string_e->buffer, "--@\n X");
+
+    str_trim_end_matches(string_empty_a, "()");
+    cr_assert_str_empty(string_empty_a->buffer);
+
+    str_trim_end_matches(NULL, "CDT");
+
+    str_drop(&string_d);
+    str_drop(&string_e);
+}
+
+Test(str, trim_end_matches_fn) {
+    str_t* string_d = str_new("123 abc89 98");
+
+    str_trim_end_matches_fn(string_d, predicate_b);
+    cr_assert_str_eq(string_d->buffer, "123 abc89 ");
+
+    str_trim_end_matches_fn(string_d, predicate_b);
+    str_trim_end_matches_fn(string_d, NULL);
+    cr_assert_str_eq(string_d->buffer, "123 abc89 ");
+
+    str_trim_end_matches_fn(string_empty_a, predicate_b);
+    cr_assert_str_empty(string_empty_a->buffer);
+
+    str_trim_end_matches_fn(NULL, predicate_c);
+
+    str_drop(&string_d);
+}
+
+Test(str, replace) {
+    str_replace(string_a, " & ", " and ");
+    cr_assert_str_eq(string_a->buffer, "Pull and Bear");
+
+    str_replace(string_a, "Bear", "Push");
+    cr_assert_str_eq(string_a->buffer, "Pull and Push");
+
+    str_replace(string_a, "x", "y");
+    cr_assert_str_eq(string_a->buffer, "Pull and Push");
+
+    str_replace(string_a, " ", NULL);
+    cr_assert_str_eq(string_a->buffer, "PullandPush");
+
+    str_replace(string_a, "and", "");
+    cr_assert_str_eq(string_a->buffer, "PullPush");
+
+    str_replace(string_a, "PullPushPullPush", "");
+    cr_assert_str_eq(string_a->buffer, "PullPush");
+
+    str_replace(string_a, "Pu", "Bu");
+    cr_assert_str_eq(string_a->buffer, "BullBush");
+}
+
+Test(str, starts_with) {
+    cr_assert(str_starts_with(string_a, "Pull"));
+    cr_assert_not(str_starts_with(string_a, "\nFool"));
+    cr_assert(str_starts_with(string_a, ""));
+
+    cr_assert(str_starts_with(string_c, "AbCd12\t"));
+    cr_assert(str_starts_with(string_c, "AbCd12\t&#\n"));
+    cr_assert(str_starts_with(string_c, ""));
+    cr_assert_not(str_starts_with(string_c, "AbCd12\t&#\n12"));
+
+    cr_assert_not(str_starts_with(string_empty_a, "abcd"));
+    cr_assert(str_starts_with(string_empty_a, ""));
+    cr_assert_not(str_starts_with(string_empty_a, NULL));
+
+    cr_assert_not(NULL, "abc");
+}
+
+Test(str, ends_with) {
+    cr_assert(str_ends_with(string_a, "& Bear"));
+    cr_assert_not(str_ends_with(string_a, "r\n"));
+    cr_assert(str_ends_with(string_a, ""));
+
+    cr_assert(str_ends_with(string_c, "&#\n"));
+    cr_assert(str_ends_with(string_c, "AbCd12\t&#\n"));
+    cr_assert(str_ends_with(string_c, ""));
+    cr_assert_not(str_ends_with(string_c, "\t&\n"));
+
+    cr_assert_not(str_ends_with(string_empty_a, "abcd"));
+    cr_assert(str_ends_with(string_empty_a, ""));
+    cr_assert_not(str_ends_with(string_empty_a, NULL));
+
+    cr_assert_not(NULL, "abc");
+}
+
+Test(str, to_lowercase) {
+    str_to_lowercase(string_a);
+    cr_assert_str_eq(string_a->buffer, "pull & bear");
+
+    str_to_lowercase(string_b);
+    cr_assert_str_eq(string_b->buffer, "one two three");
+
+    str_to_lowercase(string_c);
+    cr_assert_str_eq(string_c->buffer, "abcd12\t&#\n");
+
+    str_to_lowercase(NULL);
+}
+
+Test(str, to_uppercase) {
+    str_to_uppercase(string_a);
+    cr_assert_str_eq(string_a->buffer, "PULL & BEAR");
+
+    str_to_uppercase(string_b);
+    cr_assert_str_eq(string_b->buffer, "ONE TWO THREE");
+
+    str_to_uppercase(string_c);
+    cr_assert_str_eq(string_c->buffer, "ABCD12\t&#\n");
+
+    str_to_uppercase(NULL);
+}
+
+Test(str, literal_len) {
+    cr_assert_eq(__str_literal_len(""), 0);
+    cr_assert_eq(__str_literal_len("Godspeed"), 8);
+    cr_assert_eq(__str_literal_len(NULL), 0);
+}
+
+Test(str, literal_contains) {
+    cr_assert(__str_literal_contains("Godspeed", 'e'));
+    cr_assert(__str_literal_contains("&*\nhhh\n", '\n'));
+    cr_assert_not(__str_literal_contains("&*\nhhh\n", '\t'));
+    cr_assert_not(__str_literal_contains(NULL, '\t'));
+    cr_assert_not(__str_literal_contains("abc", '\0'));
+}
