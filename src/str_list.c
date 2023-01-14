@@ -192,37 +192,6 @@ str_t* str_list_join(const str_list_t* self, const char* delim) {
     return result_str;
 }
 
-static int str_compare_asc(const void* a, const void* b) {
-    const str_t* str_a = a;
-    const str_t* str_b = b;
-
-    const size_t min_len =
-        (str_a->len < str_b->len) ? str_a->len : str_b->len;
-
-    return strncmp(str_a->buffer, str_b->buffer, min_len);
-}
-
-static int str_compare_desc(const void* a, const void* b) {
-    const str_t* str_a = a;
-    const str_t* str_b = b;
-
-    const size_t min_len =
-        (str_a->len < str_b->len) ? str_a->len : str_b->len;
-
-    return strncmp(str_b->buffer, str_a->buffer, min_len);
-}
-
-void str_list_sort(str_list_t* self, bool asc) {
-    if ((self == NULL) || (self->size <= 1)) {
-        return;
-    }
-    
-    int (*predicate) (const void*, const void*) =
-        asc ? str_compare_asc : str_compare_desc;
-
-    qsort(self->buffer, self->size, sizeof(str_t*), predicate);
-}
-
 str_list_t* str_split_whitespace(const str_t* self) {
     const char* whitespace_delim = " \t\v\n\r";
 

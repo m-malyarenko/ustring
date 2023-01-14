@@ -166,20 +166,6 @@ str_list_t* str_split(const str_t* self, const char* delim);
 str_t* str_list_join(const str_list_t* self, const char* delim);
 
 /**
- * @brief Sort string list in lexicographical order
- * 
- * Function places contained strings in ascending or desending
- * lexicographical order based on standart strcmp function.
- * Locale is not considered.
- * If @c self is @c NULL, function does nothing.
- * 
- * @param self Pointer to the initialised string list
- * @param asc @c true - sort in ascending order,
- *      @c false sort in descending order
- */
-void str_list_sort(str_list_t* self, bool asc);
-
-/**
  * @brief Same as @c str_split with whitespace characters as separartor
  * 
  * Function splits the string into string list by whitespace characters
