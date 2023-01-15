@@ -1,280 +1,220 @@
-#include <string.h>
+#include <criterion/criterion.h>
 
-#include "utest.h"
+#include <stdio.h>
 
-#include "../src/str_list.c"
-#include "../src/str.c"
+#include <ustring/str_list.h>
+#include "../src/str_list_p.h"
 
-static void str_list_new_test() {
-    str_list_t* list = str_list_new();
+static str_list_t* list_a;
+static str_list_t* list_b;
+static str_list_t* list_empty;
+static str_list_t* list_null;
 
-    assert(list->size == 0);
-    assert(list->cap == STR_LIST_DEFAULT_CAPACITY);
-    assert(list->buffer != NULL);
+static void setup(void) {
+    list_a = str_list_new();
+    str_list_push(list_a, str_new("foo"));
+    str_list_push(list_a, str_new("bar"));
+    str_list_push(list_a, str_new("baz"));
 
-    str_list_drop(list);
+    list_b = str_list_new();
+    str_list_push(list_b, str_new("Hello"));
+    str_list_push(list_b, str_new("world"));
 
-    test_passed;
+    list_empty = str_list_new();
+    list_null = NULL;
 }
 
-static void str_list_with_capacity_test() {
-    str_list_t* list = str_list_with_capacity(15);
-
-    assert(list->size == 0);
-    assert(list->cap == 15);
-    assert(list->buffer != NULL);
-
-    str_list_drop(list);
-
-    test_passed;
+static void teardown(void) {
+    str_list_drop(&list_a);
+    str_list_drop(&list_b);
+    str_list_drop(&list_empty);
 }
 
-static void str_list_drop_test() {
-    str_list_t* list = str_list_new();
-    str_list_push(list, str_new("Hello"));
-    str_list_push(list, str_new(" "));
-    str_list_push(list, str_new("World"));
+TestSuite(str_list, .init = setup, .fini = teardown);
 
-    str_list_drop(list);
-
-    assert(list->buffer == NULL);
-    assert(list->size == 0);
-    assert(list->cap == 0);
-
-    test_passed;
+Test(str_list, new) {
+    cr_assert_eq(list_empty->size, 0);
+    cr_assert_eq(list_empty->cap, STR_LIST_DEFAULT_CAPACITY);
+    cr_assert_not_null(list_empty->buffer);
 }
 
-static void str_list_push_test() {
-    str_list_t* list = str_list_new();
-    str_list_push(list, str_new("One"));
-    str_list_push(list, NULL);
-    str_list_push(list, str_new("Two"));
-    str_list_push(list, str_new("Three"));
+Test(str_list, with_capacity) {
+    str_list_t* list_1 = str_list_with_capacity(15);
+    cr_assert_eq(list_1->size, 0);
+    cr_assert_eq(list_1->cap, 15);
+    cr_assert_not_null(list_1->buffer);
 
-    assert(str_list_size(list) == 3);
-    assert(strcmp(str_as_ptr(str_list_at(list, 0)), "One") == 0);
-    assert(strcmp(str_as_ptr(str_list_at(list, 1)), "Two") == 0);
-    assert(strcmp(str_as_ptr(str_list_at(list, 2)), "Three") == 0);
+    str_list_t* list_2 = str_list_with_capacity(0);
+    cr_assert_eq(list_2->size, 0);
+    cr_assert_eq(list_2->cap, 0);
+    cr_assert_null(list_2->buffer);
 
-    str_list_drop(list);
-    test_passed;
+    str_list_drop(&list_1);
+    str_list_drop(&list_2);
 }
 
-static void str_list_pop_test() {
-    str_list_t* list = str_list_new();
-    str_list_push(list, str_new("One"));
-    str_list_push(list, NULL);
-    str_list_push(list, str_new("Two"));
-    str_list_push(list, str_new("Three"));
+Test(str_list, copy) {
+    str_list_t* list_a_copy = str_list_copy(list_a);
 
-    assert(str_list_size(list) == 3);
+    cr_assert_eq(list_a_copy->size, list_a->size);
+    cr_assert_gt(list_a_copy->cap, 0);
+    cr_assert_not_null(list_a_copy->buffer);
+    cr_assert_str_eq(list_a->buffer[0]->buffer, list_a_copy->buffer[0]->buffer);
+    cr_assert_str_eq(list_a->buffer[1]->buffer, list_a_copy->buffer[1]->buffer);
+    cr_assert_str_eq(list_a->buffer[2]->buffer, list_a_copy->buffer[2]->buffer);
 
-    str_t* string = str_list_pop(list);
-    assert(string != NULL);
-    assert(str_list_size(list) == 2);
-    assert(strcmp(str_as_ptr(string), "Three") == 0);
-    str_drop(string);
-    string = str_list_pop(list);
-    assert(string != NULL);
-    assert(str_list_size(list) == 1);
-    assert(strcmp(str_as_ptr(string), "Two") == 0);
-    str_drop(string);
-    string = str_list_pop(list);
-    assert(string != NULL);
-    assert(str_list_size(list) == 0);
-    assert(strcmp(str_as_ptr(string), "One") == 0);
-    str_drop(string);
-    string = str_list_pop(list);
-    assert(string == NULL);
-    assert(str_list_size(list) == 0);
+    str_list_t* list_empty_copy_1 = str_list_copy(NULL);
+    cr_assert_not_null(list_empty_copy_1);
+    cr_assert_eq(list_empty_copy_1->size, 0);
+    cr_assert_eq(list_empty_copy_1->cap, STR_LIST_DEFAULT_CAPACITY);
 
-    string = str_list_pop(NULL);
-    assert(string == NULL);
-    string = str_list_pop(list);
-    assert(string == NULL);
+    str_list_t* list_empty_copy_2 = str_list_copy(list_empty);
+    cr_assert_not_null(list_empty_copy_2);
+    cr_assert_eq(list_empty_copy_2->size, 0);
 
-    str_list_drop(list);
-
-    test_passed;
+    str_list_drop(&list_a_copy);
+    str_list_drop(&list_empty_copy_1);
+    str_list_drop(&list_empty_copy_2);
 }
 
-static void str_list_size_test() {
-    str_list_t* list = str_list_new();
-    assert(str_list_size(list) == 0);
+Test(str_list, push) {
+    cr_assert_eq(list_empty->size, 0);
+    
+    str_list_push(list_empty, str_new("one"));
+    cr_assert_eq(list_empty->size, 1);
 
-    str_list_push(list, str_new("One"));
-    assert(str_list_size(list) == 1);
+    for (unsigned int i = 0; i < 120; i++) {
+        str_list_push(list_empty, str_new("string"));
+    }
 
-    str_list_push(list, NULL);
-    assert(str_list_size(list) == 1);
-
-    str_list_push(list, str_new(NULL));
-    assert(str_list_size(list) == 2);
-
-    str_drop(str_list_pop(list));
-    assert(str_list_size(list) == 1);
-
-    str_list_push(list, str_new("Two"));
-    str_list_push(list, str_new("Three"));
-    assert(str_list_size(list) == 3);
-
-    str_list_drop(list);
-
-    test_passed;
+    cr_assert_eq(list_empty->size, 121);
+    str_list_push(list_empty, NULL);
+    cr_assert_eq(list_empty->size, 121);
+    str_list_push(NULL, NULL);
 }
 
-static void str_list_cap_test() {
-    str_list_t* list1 = str_list_new();
-    assert(str_list_cap(list1) == STR_LIST_DEFAULT_CAPACITY);
+Test(str_list, pop) {
+    str_t* str_baz = str_list_pop(list_a);
+    cr_assert_str_eq(str_baz->buffer, "baz");
+    cr_assert_eq(list_a->size, 2);
 
-    str_list_t* list2 = str_list_with_capacity(2);
-    assert(str_list_cap(list2) == 2);
+    str_t* str_bar = str_list_pop(list_a);
+    cr_assert_str_eq(str_bar->buffer, "bar");
+    cr_assert_eq(list_a->size, 1);
 
-    str_list_push(list2, str_new("A"));
-    str_list_push(list2, str_new("B"));
-    str_list_push(list2, str_new("C"));
-    assert(str_list_cap(list2) == 4);
-
-    str_list_drop(list1);
-    str_list_drop(list2);
-
-    test_passed;
+    str_t* str_foo = str_list_pop(list_a);
+    cr_assert_str_eq(str_foo->buffer, "foo");
+    cr_assert_eq(list_a->size, 0);
 }
 
-static void str_list_is_empty_test() {
-    str_list_t* list = str_list_new();
-    assert(str_list_is_empty(list));
-    assert(str_list_is_empty(NULL));
-
-    str_list_push(list, str_new("ABC"));
-    assert(!str_list_is_empty(list));
-    str_drop(str_list_pop(list));
-    assert(str_list_is_empty(list));
-    assert(str_list_is_empty(NULL));
-
-    str_list_drop(list);
-
-    test_passed;
+Test(str_list, empty) {
+    cr_assert(str_list_is_empty(list_empty));
+    cr_assert(str_list_is_empty(NULL));
+    cr_assert_not(str_list_is_empty(list_a));
+    cr_assert_not(str_list_is_empty(list_b));
 }
 
-static void str_list_at_test() {
-    str_list_t* list = str_list_new();
-    assert(str_list_at(list, 0) == NULL);
-    assert(str_list_at(NULL, 0) == NULL);
+Test(str_list, at) {
+    str_t* str_bar = str_list_at(list_a, 1);
+    cr_assert_not_null(str_bar);
+    cr_assert_str_eq(str_bar->buffer, "bar");
 
-    str_list_push(list, str_new("ABC"));
-    str_list_push(list, str_new("CDE"));
+    str_t* str_baz = str_list_at(list_a, 2);
+    cr_assert_not_null(str_baz);
+    cr_assert_str_eq(str_baz->buffer, "baz");
 
-    assert(str_list_at(list, 0) != NULL);
-    assert(strcmp(str_as_ptr(str_list_at(list, 0)), "ABC") == 0);
-    assert(str_list_at(list, 1) != NULL);
-    assert(strcmp(str_as_ptr(str_list_at(list, 1)), "CDE") == 0);
-    assert(str_list_at(list, 4) == NULL);
+    str_t* str_foo = str_list_at(list_a, 0);
+    cr_assert_not_null(str_foo);
+    cr_assert_str_eq(str_foo->buffer, "foo");
 
-    str_list_drop(list);
-
-    test_passed;
+    cr_assert_null(str_list_at(list_a, 3));
+    cr_assert_null(str_list_at(list_a, 4));
+    cr_assert_null(str_list_at(list_empty, 0));
+    cr_assert_null(str_list_at(NULL, 7));
 }
 
-static void str_split_test() {
-    str_t* str1 = str_new(",  One, Two, Three, Four  ,");
-    str_t* str2 = str_new(",;,;Hello");
-    str_t* str3 = str_new("Hello,;,;");
-    str_t* str4 = str_new(",;,;,;,");
-    str_t* str5 = str_new(NULL);
+Test(str_list, spilt) {
+    str_t* file_path = str_new("/home/alex/documents/pdf/text.pdf");
+    str_list_t* file_path_list = str_split(file_path, "/");
 
-    str_list_t* list1 = str_split(str1, " ,");
-    assert(list1 != NULL);
-    assert(str_list_size(list1) == 4);
-    assert(strcmp(str_as_ptr(str_list_at(list1, 0)), "One") == 0);
-    assert(strcmp(str_as_ptr(str_list_at(list1, 1)), "Two") == 0);
-    assert(strcmp(str_as_ptr(str_list_at(list1, 2)), "Three") == 0);
-    assert(strcmp(str_as_ptr(str_list_at(list1, 3)), "Four") == 0);
+    cr_assert_eq(file_path_list->size, 5);
+    cr_assert_str_eq(file_path_list->buffer[0]->buffer, "home");
+    cr_assert_str_eq(file_path_list->buffer[1]->buffer, "alex");
+    cr_assert_str_eq(file_path_list->buffer[2]->buffer, "documents");
+    cr_assert_str_eq(file_path_list->buffer[3]->buffer, "pdf");
+    cr_assert_str_eq(file_path_list->buffer[4]->buffer, "text.pdf");
 
-    str_list_t* list2 = str_split(NULL, " ,");
-    assert(list2 != NULL);
-    assert(str_list_is_empty(list2));
+    str_drop(&file_path);
+    str_list_drop(&file_path_list);
 
-    str_list_t* list3 = str_split(str5, " ,");
-    assert(list3 != NULL);
-    assert(str_list_is_empty(list3));
+    str_t* alnum_pattern = str_new("1233abc33231mkk111koo3");
+    str_list_t* alnum_pattern_list = str_split(alnum_pattern, "123");
 
-    str_list_t* list4 = str_split(str5, " ,");
-    assert(list4 != NULL);
-    assert(str_list_is_empty(list3));
+    cr_assert_eq(alnum_pattern_list->size, 3);
+    cr_assert_str_eq(alnum_pattern_list->buffer[0]->buffer, "abc");
+    cr_assert_str_eq(alnum_pattern_list->buffer[1]->buffer, "mkk");
+    cr_assert_str_eq(alnum_pattern_list->buffer[2]->buffer, "koo");
 
-    str_list_t* list5 = str_split(str2, " ,;");
-    assert(list5 != NULL);
-    assert(str_list_size(list5) == 1);
-    assert(strcmp(str_as_ptr(str_list_at(list5, 0)), "Hello") == 0);
+    str_drop(&alnum_pattern);
+    str_list_drop(&alnum_pattern_list);
 
-    str_list_t* list6 = str_split(str3, " ,;");
-    assert(list6 != NULL);
-    assert(str_list_size(list6) == 1);
-    assert(strcmp(str_as_ptr(str_list_at(list6, 0)), "Hello") == 0);
+    str_list_t* empty_pattern_list = str_split(NULL, "");
+    cr_assert_eq(empty_pattern_list->size, 0);
 
-    str_list_drop(list1);
-    str_list_drop(list2);
-    str_list_drop(list3);
-    str_list_drop(list4);
-    str_list_drop(list5);
-    str_list_drop(list6);
+    str_list_drop(&empty_pattern_list);
 
-    str_drop(str1);
-    str_drop(str2);
-    str_drop(str3);
-    str_drop(str4);
-    str_drop(str5);
+    str_t* single_pattern = str_new("lopilopilalalay");
+    str_list_t* single_pattern_list = str_split(single_pattern, "");
+    cr_assert_eq(single_pattern_list->size, 1);
+    cr_assert_str_eq(single_pattern_list->buffer[0]->buffer, "lopilopilalalay");
 
-    test_passed;
+    str_drop(&single_pattern);
+    str_list_drop(&single_pattern_list);
 }
 
-static void str_list_join_test() {
-    str_list_t* list1 = str_list_new();
-    str_list_push(list1, str_new("Extra"));
-    str_list_push(list1, str_new("Mega"));
-    str_list_push(list1, str_new("Super"));
-    str_list_push(list1, str_new("Meta"));
-    str_list_push(list1, str_new("Doughnut"));
+Test(str_list, sort_whitespace) {
+    str_t* ws_pattern = str_new(" hello \t\ndarkness, my  old \v\t friend  ");
+    str_list_t* ws_pattern_list = str_split_whitespace(ws_pattern);
 
-    str_t* str1 = str_list_join(list1, "-");
-    assert(strcmp(str_as_ptr(str1), "Extra-Mega-Super-Meta-Doughnut") == 0);
+    cr_assert_eq(ws_pattern_list->size, 5);
+    cr_assert_str_eq(ws_pattern_list->buffer[0]->buffer, "hello");
+    cr_assert_str_eq(ws_pattern_list->buffer[1]->buffer, "darkness,");
+    cr_assert_str_eq(ws_pattern_list->buffer[2]->buffer, "my");
+    cr_assert_str_eq(ws_pattern_list->buffer[3]->buffer, "old");
+    cr_assert_str_eq(ws_pattern_list->buffer[4]->buffer, "friend");
 
-    str_t* str2 = str_list_join(list1, "; ");
-    assert(strcmp(str_as_ptr(str2), "Extra; Mega; Super; Meta; Doughnut") == 0);
-
-    str_t* str3 = str_list_join(NULL, "-");
-    assert(str3 != NULL);
-    assert(str_is_empty(str3));
-
-    str_list_t* list2 = str_list_new();
-    str_t* str4 = str_list_join(list2, "-");
-    assert(str4 != NULL);
-    assert(str_is_empty(str4));
-
-    str_list_drop(list1);
-    str_list_drop(list2);
-
-    str_drop(str1);
-    str_drop(str2);
-    str_drop(str3);
-    str_drop(str4);
-
-    test_passed;
+    str_drop(&ws_pattern);
+    str_list_drop(&ws_pattern_list);
 }
 
-int main() {
-    str_list_new_test();
-    str_list_with_capacity_test();
-    str_list_drop_test();
-    str_list_push_test();
-    str_list_pop_test();
-    str_list_size_test();
-    str_list_cap_test();
-    str_list_is_empty_test();
-    str_list_at_test();
-    str_split_test();
-    str_list_join_test();
+Test(str_list, join) {
+    str_t* joined_hyphen_foobar = str_list_join(list_a, "-");
+    cr_assert_str_eq(joined_hyphen_foobar->buffer, "foo-bar-baz");
 
-    return 0;
+    str_t* joined_ws_foobar = str_list_join(list_a, " \t");
+    cr_assert_str_eq(joined_ws_foobar->buffer, "foo \tbar \tbaz");
+
+    str_t* empty_string = str_list_join(NULL, "");
+    cr_assert_eq(empty_string->len, 0);
+
+    str_drop(&joined_hyphen_foobar);
+    str_drop(&joined_ws_foobar);
+    str_drop(&empty_string);
+}
+
+Test(str_list, contains) {
+    str_t* string_foo = str_new("foo");
+    str_t* string_baz = str_new("baz");
+    str_t* string_beez = str_new("beez");
+
+    cr_assert(str_list_contains(list_a, string_foo));
+    cr_assert(str_list_contains(list_a, string_baz));
+    cr_assert_not(str_list_contains(list_a, string_beez));
+    cr_assert_not(str_list_contains(list_empty, string_beez));
+    cr_assert_not(str_list_contains(NULL, string_beez));
+    cr_assert_not(str_list_contains(list_a, NULL));
+
+    str_drop(&string_foo);
+    str_drop(&string_baz);
+    str_drop(&string_beez);
 }
