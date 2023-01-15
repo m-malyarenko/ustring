@@ -1,10 +1,8 @@
-/******************************************************************************
+/**************************************************************************//**
  * 
  * @file    str.c
  * @date    15 Aug 2021
  * @author  Mikhail Malyarenko <malyarenko.md@gmail.com>
- * 
- * @brief   String library implementation
  * 
  *****************************************************************************/
 
@@ -25,10 +23,19 @@ str_t* str_new(const char* string) {
         cap *= 2;
     }
     
-    str_t* self = (str_t*) malloc(sizeof(str_t));
-    self->buffer = (char*) malloc(cap);
+    str_t* self = malloc(sizeof(str_t));
+    if (self == NULL) {
+        return NULL;
+    }
+
     self->len = len;
     self->cap = cap;
+    self->buffer = malloc(self->cap * sizeof(char));
+    if (self->buffer == NULL) {
+        free(self);
+        return NULL;
+    }
+
     for (size_t i = 0; i < len; i++) {
         self->buffer[i] = __is_ascii(string[i]) ? string[i] : '?';
     }
@@ -38,19 +45,20 @@ str_t* str_new(const char* string) {
 }
 
 str_t* str_with_capacity(size_t capacity) {
-    str_t* self = (str_t*) malloc(sizeof(str_t));
+    str_t* self = malloc(sizeof(str_t));
+    if (self == NULL) {
+        return NULL;
+    }
+
     self->len = 0;
-    
-    if (capacity <= 1) {
-        self->cap = 1;
-        self->buffer = malloc(sizeof(char));
-        self->buffer[0] = '\0';
+    self->cap = (capacity == 0) ? 1 : capacity;
+    self->buffer = malloc(capacity * sizeof(char));
+    if (self->buffer == NULL) {
+        free(self);
+        return NULL;
     }
-    else {
-        self->cap = capacity;
-        self->buffer = (char*) malloc(capacity * sizeof(char));
-        self->buffer[0] = '\0';
-    }
+
+    self->buffer[0] = '\0';
 
     return self;
 }
@@ -60,20 +68,23 @@ str_t* str_copy(const str_t* other) {
         return str_with_capacity(STR_DEFAULT_CAPACITY);
     }
 
-    str_t* self = (str_t*) malloc(sizeof(str_t));
-    self->cap = other->len + 1;
-    self->len = other->len;
+    str_t* self = malloc(sizeof(str_t));
+    if (self == NULL) {
+        return NULL;
+    }
 
-    if (self->cap == 0) {
-        self->buffer = NULL;
+    self->len = other->len;
+    self->cap = other->len + 1;
+    self->buffer = malloc(self->cap * sizeof(char));
+    if (self->buffer == NULL) {
+        free(self);
+        return NULL;
     }
-    else {
-        self->buffer = (char*) malloc(self->cap * sizeof(char));
-        for (size_t i = 0; i < self->len; i++) {
-            self->buffer[i] = other->buffer[i];
-        }
-        self->buffer[self->len] = '\0';
+
+    for (size_t i = 0; i < self->len; i++) {
+        self->buffer[i] = other->buffer[i];
     }
+    self->buffer[self->len] = '\0';
 
     return self;
 }
@@ -87,6 +98,7 @@ void str_drop(str_t** self) {
         free((*self)->buffer);
     }
 
+    free(*self);
     *self = NULL;
 }
 
@@ -103,10 +115,9 @@ bool str_is_empty(const str_t* self) {
 }
 
 char str_at(const str_t* self, const size_t pos) {
-    if (((self == NULL) || (self->len == 0)) || (pos >= self->len)) {
+    if ((self == NULL) || (self->len == 0) || (pos >= self->len)) {
         return 0;
-    }
-    else {
+    } else {
         return self->buffer[pos];
     }
 }
@@ -122,11 +133,15 @@ str_t* str_append(str_t* self, const char* string) {
         return self;
     }
 
-    const bool append_self = string == self->buffer;
+    const bool append_self = (string == self->buffer);
     char* buffer_copy = NULL;
 
     if (append_self) {
         char* buffer_copy = malloc((string_len + 1) + sizeof(char));
+        if (buffer_copy == NULL) {
+            return NULL;
+        }
+
         for (size_t i = 0; i < string_len; i++) {
             buffer_copy[i] = string[i];
         }
@@ -141,11 +156,20 @@ str_t* str_append(str_t* self, const char* string) {
             self->cap *= 2;
         }
 
+        char* new_buffer = NULL;
         if (self->buffer != NULL) {
-            self->buffer = (char*) realloc(self->buffer, self->cap * sizeof(char));
+            new_buffer = realloc(self->buffer, self->cap * sizeof(char));
+        } else {
+            new_buffer = malloc(self->cap * sizeof(char));
         }
-        else {
-            self->buffer = (char*) malloc(self->cap * sizeof(char));
+
+        if (new_buffer == NULL) {
+            if (append_self) {
+                free(buffer_copy);
+            }
+            return NULL;
+        } else {
+            self->buffer = new_buffer;
         }
     }
 
@@ -162,15 +186,17 @@ str_t* str_append(str_t* self, const char* string) {
     return self;
 }
 
-void str_clear(str_t* self) {
+int str_clear(str_t* self) {
     if (self == NULL) {
-        return;
+        return USTRING_ERR_NULLPTR;
     }
 
     self->len = 0;
     if (self->cap != 0) {
         self->buffer[0] = '\0';
-    } 
+    }
+
+    return USTRING_OK;
 }
 
 str_t* str_concat(const str_t* str_a, const str_t* str_b) {
@@ -203,10 +229,18 @@ str_t* str_concat(const str_t* str_a, const str_t* str_b) {
         cap *= 2;
     }
 
-    str_t* result_str = (str_t*) malloc(sizeof(str_t));
-    result_str->cap = cap;
+    str_t* result_str = malloc(sizeof(str_t));
+    if (result_str == NULL) {
+        return NULL;
+    }
+
     result_str->len = len;
-    result_str->buffer = (char*) malloc(cap * sizeof(char));
+    result_str->cap = cap;
+    result_str->buffer = malloc(result_str->cap * sizeof(char));
+    if (result_str->buffer == NULL) {
+        free(result_str);
+        return NULL;
+    }
 
     for (size_t i = 0; i < str_a->len; i++) {
         result_str->buffer[i] = str_a->buffer[i];
@@ -221,20 +255,24 @@ str_t* str_concat(const str_t* str_a, const str_t* str_b) {
     return result_str;
 }
 
-void str_trim(str_t* self) {
-    if ((self == NULL) || (self->len == 0)) {
-        return;
+int str_trim(str_t* self) {
+    if (self == NULL) {
+        return USTRING_ERR_NULLPTR;
+    }
+
+    if (self->len == 0) {
+        return USTRING_OK;
     }
 
     const char* front_ptr = self->buffer;
     const char* back_ptr = self->buffer + self->len;
 
     while ((front_ptr != back_ptr) && __is_blank(*front_ptr)) {
-        front_ptr++;
+        front_ptr += 1;
     }
 
     while ((back_ptr != front_ptr) && __is_blank(*(back_ptr - 1))) {
-        back_ptr--;
+        back_ptr -= 1;
     }
 
     const size_t new_len = back_ptr - front_ptr;
@@ -243,13 +281,15 @@ void str_trim(str_t* self) {
         size_t position = 0;
         while (front_ptr != back_ptr) {
             self->buffer[position] = *front_ptr;
-            front_ptr++;
-            position++;
+            front_ptr += 1;
+            position += 1;
         }   
     }
     
     self->buffer[new_len] = '\0';
     self->len = new_len;
+
+    return USTRING_OK;
 }
 
 bool str_eq(const str_t* a, const str_t* b) {
@@ -273,15 +313,17 @@ bool str_eq(const str_t* a, const str_t* b) {
     return true;
 }
 
-void str_truncate(str_t* self, size_t len) {
+int str_truncate(str_t* self, size_t len) {
     if (self == NULL) {
-        return;
+        return USTRING_ERR_NULLPTR;
     }
 
     if (self->len > len) {
         self->buffer[len] = '\0';
         self->len = len;
     }
+
+    return USTRING_OK;
 }
 
 bool str_contains(const str_t* self, const char* pattern) {
@@ -320,7 +362,7 @@ bool str_contains(const str_t* self, const char* pattern) {
         while ((matched_count < pattern_len)
                     && (self->buffer[i + matched_count] == pattern[matched_count]))
         {
-            matched_count++;
+            matched_count += 1;
         }
 
         if (matched_count == pattern_len) {
@@ -345,15 +387,19 @@ bool str_contains_fn(const str_t* self, bool (*fn) (char)) {
     return false;
 }
 
-void str_trim_matches(str_t* self, const char* pattern) {
-    if ((self == NULL) || (pattern == NULL) || (self->len == 0)) {
-        return;
+int str_trim_matches(str_t* self, const char* pattern) {
+    if ((self == NULL) || (pattern == NULL)) {
+        return USTRING_ERR_NULLPTR;
+    }
+
+    if (self->len == 0) {
+        return USTRING_OK;
     }
 
     const size_t pattern_len = __str_literal_len(pattern);
 
     if ((pattern_len == 0) || (pattern_len > self->len)) {
-        return;
+        return USTRING_OK;
     }
 
     /* Trim all occurrences of the pattern and shift string contents */
@@ -383,11 +429,17 @@ void str_trim_matches(str_t* self, const char* pattern) {
 
     self->buffer[write_idx] = '\0';
     self->len = write_idx;
+
+    return USTRING_OK;
 }
 
-void str_trim_matches_fn(str_t* self, bool (*fn) (char)) {
-    if ((self == NULL) || (fn == NULL) || (self->len == 0)) {
-        return;
+int str_trim_matches_fn(str_t* self, bool (*fn) (char)) {
+    if ((self == NULL) || (fn == NULL)) {
+        return USTRING_ERR_NULLPTR;
+    }
+
+    if (self->len == 0) {
+        return USTRING_OK;
     }
 
     size_t write_idx = 0;
@@ -404,23 +456,29 @@ void str_trim_matches_fn(str_t* self, bool (*fn) (char)) {
 
     self->buffer[write_idx] = '\0';
     self->len = write_idx;
+
+    return USTRING_OK;
 }
 
-void str_trim_start_matches(str_t* self, const char* pattern) {
-    if ((self == NULL) || (pattern == NULL) || (self->len == 0)) {
-        return;
+int str_trim_start_matches(str_t* self, const char* pattern) {
+    if ((self == NULL) || (pattern == NULL)) {
+        return USTRING_ERR_NULLPTR;
+    }
+
+    if (self->len == 0) {
+        return USTRING_OK;
     }
 
     const size_t pattern_len = __str_literal_len(pattern);
 
     if ((pattern_len == 0) || (pattern_len > self->len)) {
-        return;
+        return USTRING_OK;
     }
 
     /* Check if string starts with pattern */
     for (size_t i = 0; i < pattern_len; i++) {
         if (self->buffer[i] != pattern[i]) {
-            return;
+            return USTRING_OK;
         }
     }
 
@@ -433,11 +491,17 @@ void str_trim_start_matches(str_t* self, const char* pattern) {
 
     self->buffer[new_len] = '\0';
     self->len = new_len;
+
+    return USTRING_OK;
 }
 
-void str_trim_start_matches_fn(str_t* self, bool (*fn) (char)) {
-    if ((self == NULL) || (fn == NULL) || (self->len == 0)) {
-        return;
+int str_trim_start_matches_fn(str_t* self, bool (*fn) (char)) {
+    if ((self == NULL) || (fn == NULL)) {
+        return USTRING_ERR_NULLPTR;
+    }
+
+    if (self->len == 0) {
+        return USTRING_OK;
     }
 
     size_t start_idx = 0;
@@ -446,7 +510,7 @@ void str_trim_start_matches_fn(str_t* self, bool (*fn) (char)) {
     }
     
     if (start_idx == 0) {
-        return;
+        return USTRING_OK;
     }
 
     const size_t new_len = self->len - start_idx;
@@ -458,17 +522,23 @@ void str_trim_start_matches_fn(str_t* self, bool (*fn) (char)) {
 
     self->buffer[new_len] = '\0';
     self->len = new_len;
+
+    return USTRING_OK;
 }
 
-void str_trim_end_matches(str_t* self, const char* pattern) {
-    if ((self == NULL) || (pattern == NULL) || (self->len == 0)) {
-        return;
+int str_trim_end_matches(str_t* self, const char* pattern) {
+    if ((self == NULL) || (pattern == NULL)) {
+        return USTRING_ERR_NULLPTR;
+    }
+
+    if (self->len == 0) {
+        return USTRING_OK;
     }
 
     const size_t pattern_len = __str_literal_len(pattern);
 
     if ((pattern_len == 0) || (pattern_len > self->len)) {
-        return;
+        return USTRING_OK;
     }
 
     const size_t match_start_idx = self->len - pattern_len;
@@ -476,18 +546,24 @@ void str_trim_end_matches(str_t* self, const char* pattern) {
     /* Check if string ends with pattern */
     for (size_t i = 0; i < pattern_len; i++) {
         if (self->buffer[match_start_idx + i] != pattern[i]) {
-            return;
+            return USTRING_OK;
         }
     }
     
     /* Truncate matched suffix */
     self->buffer[match_start_idx] = '\0';
     self->len = match_start_idx;
+
+    return USTRING_OK;
 }
 
-void str_trim_end_matches_fn(str_t* self, bool (*fn) (char)) {
-    if ((self == NULL) || (fn == NULL) || (self->len == 0)) {
-        return;
+int str_trim_end_matches_fn(str_t* self, bool (*fn) (char)) {
+    if ((self == NULL) || (fn == NULL)) {
+        return USTRING_ERR_NULLPTR;
+    }
+
+    if (self->len == 0) {
+        return USTRING_OK;
     }
 
     size_t match_start_idx = self->len;
@@ -496,27 +572,32 @@ void str_trim_end_matches_fn(str_t* self, bool (*fn) (char)) {
     }
 
     self->buffer[match_start_idx] = '\0';
-    self->len = match_start_idx; 
+    self->len = match_start_idx;
+
+    return USTRING_OK;
 }
 
-void str_replace(str_t* self, const char* pattern, const char* replacement) {
-    if ((self == NULL) || (pattern == NULL) || (self->len == 0)) {
-        return;
+int str_replace(str_t* self, const char* pattern, const char* replacement) {
+    if ((self == NULL) || (pattern == NULL)) {
+        return USTRING_ERR_NULLPTR;
+    }
+
+    if (self->len == 0) {
+        return USTRING_OK;
     }
 
     const size_t pattern_len = __str_literal_len(pattern);
     if ((pattern_len == 0) || !str_contains(self, pattern)) {
-        return;
+        return USTRING_OK;
     }
 
     const size_t replacement_len = __str_literal_len(replacement);
     if (replacement_len == 0) {
-        str_trim_matches(self, pattern);
-        return;
+        return str_trim_matches(self, pattern);
     }
 
     /* Normalize replacement string */
-    char* replacement_norm = (char*) malloc(sizeof(char) * replacement_len + 1);
+    char replacement_norm[replacement_len + 1];
     for (size_t i = 0; i < replacement_len; i++) {
         replacement_norm[i] = __is_ascii(replacement[i]) ? replacement[i] : '?';
     }
@@ -524,11 +605,13 @@ void str_replace(str_t* self, const char* pattern, const char* replacement) {
 
     /* Create new string buffer */
     size_t new_cap = self->cap;
-    char* new_buffer = (char*) malloc(sizeof(char) * new_cap);
+    char* new_buffer = malloc(new_cap * sizeof(char));
+    if (new_buffer == NULL) {
+        return USTRING_ERR_OOM;
+    }
 
     size_t read_idx = 0;
     size_t write_idx = 0;
-
     while (read_idx < self->len) {
         /* Detect pattern */
         bool is_replacement = false;
@@ -554,11 +637,18 @@ void str_replace(str_t* self, const char* pattern, const char* replacement) {
                 while (current_len >= new_cap) {
                     new_cap *= 2;
                 }
-                new_buffer = (char*) realloc(new_buffer, sizeof(char) * new_cap);
+
+                char* expanded_new_buffer = realloc(new_buffer, new_cap * sizeof(char));
+                if (expanded_new_buffer == NULL) {
+                    free(new_buffer);
+                    return false;
+                } else {
+                    new_buffer = expanded_new_buffer;
+                }
             }
 
             for (size_t i = 0; i < replacement_len; i++) {
-                new_buffer[write_idx + i] = replacement[i];
+                new_buffer[write_idx + i] = replacement_norm[i];
             }
 
             write_idx += replacement_len;
@@ -566,7 +656,13 @@ void str_replace(str_t* self, const char* pattern, const char* replacement) {
             /* Write character to the buffer */
             if (write_idx == new_cap) {
                 new_cap *= 2;
-                new_buffer = (char*) realloc(new_buffer, sizeof(char) * new_cap);
+                char* expanded_new_buffer = realloc(new_buffer, sizeof(char) * new_cap);
+                if (expanded_new_buffer == NULL) {
+                    free(new_buffer);
+                    return USTRING_ERR_OOM;
+                } else {
+                    new_buffer = expanded_new_buffer;
+                }
             }
 
             new_buffer[write_idx] = self->buffer[read_idx];
@@ -578,19 +674,31 @@ void str_replace(str_t* self, const char* pattern, const char* replacement) {
     new_buffer[write_idx] = '\0';
 
     free(self->buffer);
-    free(replacement_norm);
 
     self->buffer = new_buffer;
     self->cap = new_cap;
     self->len = write_idx;
+
+    return USTRING_OK;
 }
 
-void str_shrink_to_fit(str_t* self) {
-    if ((self == NULL) || (self->cap == 0)) {
-        return;
+int str_shrink_to_fit(str_t* self) {
+    if (self == NULL) {
+        return false;
     }
 
-    self->buffer = (char*) realloc(self->buffer, sizeof(char) * (self->len + 1));
+    if (self->cap == 0) {
+        return USTRING_OK;
+    }
+
+    char* new_buffer = realloc(self->buffer, (self->len + 1) * sizeof(char));
+    if (new_buffer == NULL) {
+        return USTRING_ERR_OOM;
+    } else {
+        self->buffer = new_buffer;
+    }
+
+    return USTRING_OK;
 }
 
 bool str_starts_with(const str_t* self, const char* pattern) {
@@ -649,24 +757,36 @@ bool str_ends_with(const str_t* self, const char* pattern) {
     return true;
 }
 
-void str_to_lowercase(str_t* self) {
-    if ((self == NULL) || (self->len == 0)) {
-        return;
+int str_to_lowercase(str_t* self) {
+    if (self == NULL) {
+        return USTRING_ERR_NULLPTR;
+    }
+
+    if (self->len == 0) {
+        return USTRING_OK;
     }
 
     for (size_t i = 0; i < self->len; i++) {
         self->buffer[i] = __to_lower(self->buffer[i]);
     }
+
+    return USTRING_OK;
 }
 
-void str_to_uppercase(str_t* self) {
-    if ((self == NULL) || (self->len == 0)) {
-        return;
+int str_to_uppercase(str_t* self) {
+    if (self == NULL) {
+        return USTRING_ERR_NULLPTR;
+    }
+
+    if (self->len == 0) {
+        return USTRING_OK;
     }
 
     for (size_t i = 0; i < self->len; i++) {
         self->buffer[i] = __to_upper(self->buffer[i]);
     }
+
+    return USTRING_OK;
 }
 
 size_t __str_literal_len(const char* string) {
@@ -683,29 +803,29 @@ size_t __str_literal_len(const char* string) {
 }
 
 bool __str_literal_contains(const char* string, char ch) {
-    const size_t len = __str_literal_len(string);
-
-    if ((string == NULL) || (len == 0) || (ch == '\0')) {
+    if ((string == NULL) || (ch == '\0')) {
         return false;
     }
 
-    for (size_t i = 0; i < len; i++) {
-        if (string[i] == ch) {
+    const char* string_char = string;
+    while (*string_char != '\0') {
+        if (*string_char == ch) {
             return true;
         }
+        string_char += 1;
     }
 
     return false;
 }
 
 char __to_lower(char ch) {
-    return (__is_letter(ch) && ((unsigned char) (ch) <= 0x5a)) ?
-        ch + ASCII_LETTER_CASE_CODE_SHIFT :
-        ch;
+    return (__is_letter(ch) && ((unsigned char) (ch) <= 0x5a))
+        ? ch + ASCII_LETTER_CASE_CODE_SHIFT
+        : ch;
 }
 
 char __to_upper(char ch) {
-    return (__is_letter(ch) && ((unsigned char) (ch) >= 0x61)) ?
-        ch - ASCII_LETTER_CASE_CODE_SHIFT :
-        ch;
+    return (__is_letter(ch) && ((unsigned char) (ch) >= 0x61))
+        ? ch - ASCII_LETTER_CASE_CODE_SHIFT
+        : ch;
 }
