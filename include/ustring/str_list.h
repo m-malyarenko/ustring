@@ -6,8 +6,9 @@
  * 
  * @brief   String List library API
  * 
- * API header for the String List library for C language. String List depends
- * on the String library.
+ * The library provides dynamic heap-based string list data structure,
+ * string list type and set of methods implementing basic operations,
+ * such as adding/deleting strings, splitting and joining strings.
  * 
  *****************************************************************************/
 
@@ -19,89 +20,92 @@
 #include "str.h"
 
 /**
- * @struct String List type
+ * @addtogroup API
+ * @{
+ * 
+ * @addtogroup StringList
+ * 
+ * String List library API.
+ * 
+ * The library provides dynamic heap-based string list data structure,
+ * string list type and set of methods implementing basic operations,
+ * such as adding/deleting strings, splitting and joining strings.
+ * 
+ * @{
  */
-typedef struct __str_list str_list_t;
+
+typedef struct __str_list str_list_t; /**< String list type */
 
 /**
- * @brief Creates new instance of an empty string list with default capacity.
+ * @brief Creates new instance of an empty string list
  * 
- * @return Pointer to the allocated instance of an empty string list
+ * Constructs new heap-allocated string list (array) instance
+ * 
+ * @return On success, returns the pointer to the new string list instance.
+ *      On failure, returns @c NULL
  */
 str_list_t* str_list_new();
 
 /**
- * @brief Created an empty string list with the given capacity.
+ * @brief Created an empty string list with the given capacity
  * 
  * @param capacity Capacity of the buffer
- * @return Pointer to the allocated instance of the string list
- * @note If capacity is 0 no memory allocation is performed
- *       and buffer is empty
+ * @return On success, returns the pointer to the new string list instance. On failure, returns @c NULL
+ * @note If capacity is 0 no memory allocation is performed and buffer is empty
  */
 str_list_t* str_list_with_capacity(size_t capacity);
 
 /**
- * @brief Creates the new copy of the string list.
+ * @brief Creates the new copy of the string list
  * 
  * Function creates a copy of the given string list by 
- * creating deep copies of each string that buffer contains.
+ * creating deep copies of each string in the list buffer.
  * 
- * @param other String list to be copied
- * @return Pointer to the new instance of string list which is
- *         a copy of the given string list.
- *         If the given pointer is @c NULL an empty string list is returned.
+ * @param other Pointer to the initialized string list instance to be copied
+ * @return On success, returns the pointer to the new string list instance. On failure, returns @c NULL
+ * @note If the given pointer is @c NULL an empty string list is returned.
  */
 str_list_t* str_list_copy(const str_list_t* other);
 
 /**
- * @brief Drops the buffer of the string list and sets all attributes to 0.
+ * @brief Deallocates string list instance and all its contents
  * 
- * @param self Pointer to the initialised string list
- * @return void
- * @note If @code{self} is @c NULL function does nothing
- * @warning After string list is dropped it must not be used
+ * @param self Pointer to the pointer to the initialized string list instance
+ * @warning After string list is dropped it must not be used,
+ *      the string list pointer passed to the funcion will be set to @c NULL
  */
 void str_list_drop(str_list_t** self);
 
 /**
  * @brief Adds string instance to the end of the list
  * 
- * Function adds pointer to the string to the end
- * of the string list. Function reallocates memory if buffer has not
- * enough space for holding data.
- * 
- * @param self Pointer to the initialised string list
- * @param string Pointer to the string to be added to the string list
- * @return void
- * @note String list takes ownership of the string
+ * @param self Pointer to the initialized string list instance
+ * @param string Pointer to the initialized string instance to be added
+ * @warning String list takes ownership of the string, string must not be dropped externaly
  */
-void str_list_push(str_list_t* self, str_t* string);
+int str_list_push(str_list_t* self, str_t* string);
 
 /**
- * @brief Pops the last string in the string list
+ * @brief Returns the last string in the list and deletes it
  * 
- * Function pops the last string in the string list if any and
- * deletes it from string list.
- * 
- * @param self Pointer to the initialised string list
- * @return Pointer to the last string in the string list;
- *         @c NULL if string list is empty or uninitialized
+ * @param self Pointer to the initialized string list instance
+ * @return Pointer to the last string in the string list; @c NULL if string list is empty or @c NULL
+ * @warning String list losses ownership of the string, string must be dropped implicitly
  */
 str_t* str_list_pop(str_list_t* self);
 
 /**
  * @brief Returns the size of the string list
  * 
- * @param self Pointer to the initialised string list
- * @return Size of the string list:
- *         0 if the string list is empty or @c NULL
+ * @param self Pointer to the initialized string list instance
+ * @return Size of the string list: 0 if the string list is empty or @c NULL
  */
 size_t str_list_size(const str_list_t* self);
 
 /**
  * @brief Returns the capacity of the string list
  * 
- * @param self Pointer to the initialised string list
+ * @param self Pointer to the initialized string list instance
  * @return Capacity of the string list;
  *         0 if the string list's buffer is empty or if string list is @c NULL
  */
@@ -110,57 +114,60 @@ size_t str_list_cap(const str_list_t* self);
 /**
  * @brief Checks if the string list is empty
  * 
- * @param self Pointer to the initialised string list
+ * @param self Pointer to the initialized string list instance
  * @return @c true if string list has at least one element
- *         0 if the string list is empty or @c NULL
+ *         0 if the string list is empty or @c self is @c NULL
  */
 bool str_list_is_empty(const str_list_t* self);
 
 /**
- * @brief Returns the string with the given index in the string list
- * starting with 0. Function provides bound checking.
+ * @brief Returns the string at given index starting from 0.
  * 
- * @param self Pointer to the initialised string list
- * @param idx Position of the string in the given string list
- * @return String of the string list with the given index; @c 0 if @c idx
- *      is greater or equal to the size of the string or if the string is
- *      empty or @c NULL
+ * @param self Pointer to the initialized string list instance
+ * @param idx Position of the string in the given string list starting from 0
+ * @return String of the string list with the given index;
+ *        @c NULL is returned if
+ *          - position violates the bounds or
+ *          - string list is empty or
+ *          - @c self is @c NULL
  */
 str_t* str_list_at(const str_list_t* self, const size_t idx);
 
 /**
  * @brief Splits the string around the given delimeter
  * 
- * Function splits the string to one or more strings around any sequence of any
+ * Splits the string to one or more strings around any sequence of any
  * character provided by the given delimeter string.
- * Resulting string chunks are new instances @c str_t type.
+ * Resulting string chunks are new string instances.
+ * If string starts or ends with the delimeter character sequnce,
+ * no additional empty string are added. 
  * 
- * @param self Pointer to the initialised string
- * @param delim Delimeter. Null-terminated string literal with
- *              valid ASCII characters.
- * @return Pointer to the new string list that contains all resulting
- *      string chunks: Empty string list if @c self is @c NULL or empty
+ * @param string Pointer to the initialized string instance
+ * @param delim Delimeter - NULL-terminated byte string of valid ASCII characters
+ * @return Pointer to the new string list that contains all resulting string chunks.
+ *      Empty string list if @c self is @c NULL or empty.
+ *      On failure returns @c NULL
  * 
- * @example
- * 
- *      str_t* string = str_new("One, Two; Three");
+ * @code
+ *      str_t* string = str_new(" .One, Two; Three");
  *      str_list_t* list = str_split(string, " ,;");
  *      // Pseudocode:
  *      // list = ["One", "Two", "Three"]
+ * @endcode
  */
-str_list_t* str_split(const str_t* self, const char* delim);
+str_list_t* str_split(const str_t* string, const char* delim);
 
 /**
  * @brief Joins all provided strings and puts delimeter sequence between them
  * 
- * Function joins provided string by putting them together with the given
- * delimeter sequence.
+ * Joins provided strings by putting them together with the
+ * given delimeter sequence between items.
  * 
- * @param self Pointer to the initialised string list
- * @param delim Delimeter: null-terminated string literal with
- *              valid ASCII characters
- * @return Pointer to the new instance of the string that contains 
- *         joined strings; Empty string if @c self is @c NULL
+ * @param self Pointer to the initialized string ilist nstance
+ * @param delim Delimeter - NULL-terminated byte string of valid ASCII characters
+ * @return Pointer to the new instance of the string that contains joined strings.
+ *      Empty string if @c self is @c NULL.
+ *      On failure returns @c NULL
  * @note If delimeter is @c NULL it considered as an empty string 
  */
 str_t* str_list_join(const str_list_t* self, const char* delim);
@@ -169,27 +176,35 @@ str_t* str_list_join(const str_list_t* self, const char* delim);
  * @brief Same as @c str_split with whitespace characters as separartor
  * 
  * Function splits the string into string list by whitespace characters
- * @b space (' '), @b h-tab (\t), @b v-tab (\v),
- * @b newline (\n), @b carriage return (\r).
+ * @b space (' '), @b h-tab (\\t), @b v-tab (\\v),
+ * @b newline (\\n), @b carriage return (\\r).
  * 
- * @param self Pointer to the initialised string
- * @return Pointer to new string list containing the resulting
- *      string chunks. Empty if @c self is @c NULL or
- *      empty string list.
+ * @param string Pointer to the initialized string instance
+ * @return Pointer to the new string list that contains all resulting string chunks.
+ *      Empty string list if @c self is @c NULL or empty.
+ *      On failure returns @c NULL
  */
-str_list_t* str_split_whitespace(const str_t* self);
+str_list_t* str_split_whitespace(const str_t* string);
 
 /**
  * @brief Checks is string list contains specified string
  * 
- * Function compares each element of the string list with
- * the given string to find a equal match.
+ * Compares each element of the string list with
+ * the given string to find an equal match.
  * 
- * @param self Pointer to the initialised string list
- * @param string Pointer to the initialised string to find in list
+ * @param self Pointer to the initialized string list instance
+ * @param string String to findin thelist - pointer to the initialized string instance
  * @return @c true if strling list contains the given string;
- *      @c false otherwise
+ *      @c false otherwise or if either @c self or @c string is @c NULL
  */
 bool str_list_contains(const str_list_t* self, const str_t* string);
+
+/**
+ * @}
+ */ /* StringList */
+
+/**
+ * @}
+ */ /* API */
 
 #endif /* __USTRING_STR_LIST_H__ */
