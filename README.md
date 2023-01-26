@@ -8,7 +8,7 @@ __ustring__ features:
 - Dynamic heap-allocated string data structure and type `str_t`
 - Dynamic heap-allocated string list data structure  and type `str_list_t`
 - Plenty of string and string list manipulation methods
-- Depends only on the standart C library
+- Depends only on the standard C library
 
 __ustring__ API tries to be as safe as it possible with C language:
 - Required NULL pointer and memory allocation fail checks are provided
@@ -25,7 +25,7 @@ __ustring__ may be used:
 
 ### Meson subproject
 
-To use __ustring__ as Meson subproject, put this repository in the _subprojects_ directory and in the root of the _subprojects_ create an `ustring.wrap` file containing the folowing lines
+To use __ustring__ as Meson subproject, put this repository in the _subprojects_ directory and in the root of the _subprojects_ create an `ustring.wrap` file containing the following lines
 
     [provides]
     ustring = ustring_dep
@@ -36,7 +36,7 @@ Next add dependency in your `meson.build` as follows
 
 ### Standalone static library
 
-To use __ustring__ as standalone static library file buld it with following lines (in the root of the project):
+To use __ustring__ as standalone static library file build it with following lines (in the root of the project):
 
     $meson setup builddir
     $meson compile -C builddir
