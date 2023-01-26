@@ -81,7 +81,8 @@ void str_list_drop(str_list_t** self);
  * 
  * @param self Pointer to the initialized string list instance
  * @param string Pointer to the initialized string instance to be added
- * @warning String list takes ownership of the string, string must not be dropped externaly
+ * @return On success returns zero. On failure returns non-zero value
+ * @warning String list takes ownership of the string, string must not be dropped externally
  */
 int str_list_push(str_list_t* self, str_t* string);
 
@@ -193,8 +194,8 @@ str_list_t* str_split_whitespace(const str_t* string);
  * the given string to find an equal match.
  * 
  * @param self Pointer to the initialized string list instance
- * @param string String to findin thelist - pointer to the initialized string instance
- * @return @c true if strling list contains the given string;
+ * @param string String to find in the list - pointer to the initialized string instance
+ * @return @c true if string list contains the given string;
  *      @c false otherwise or if either @c self or @c string is @c NULL
  */
 bool str_list_contains(const str_list_t* self, const str_t* string);

@@ -7,9 +7,13 @@
  *****************************************************************************/
 
 #include <stdlib.h>
+#include <errno.h>
 
 #include <ustring/str.h>
 #include "str_p.h"
+
+#define USTRING_OK  ((int) 0)
+#define USTRING_ERR ((int) 1)
 
 str_t* str_new(const char* string) {   
     if (string == NULL) {
@@ -188,7 +192,7 @@ str_t* str_append(str_t* self, const char* string) {
 
 int str_clear(str_t* self) {
     if (self == NULL) {
-        return USTRING_ERR_NULLPTR;
+        return USTRING_ERR;
     }
 
     self->len = 0;
@@ -257,7 +261,7 @@ str_t* str_concat(const str_t* str_a, const str_t* str_b) {
 
 int str_trim(str_t* self) {
     if (self == NULL) {
-        return USTRING_ERR_NULLPTR;
+        return USTRING_ERR;
     }
 
     if (self->len == 0) {
@@ -315,7 +319,7 @@ bool str_eq(const str_t* a, const str_t* b) {
 
 int str_truncate(str_t* self, size_t len) {
     if (self == NULL) {
-        return USTRING_ERR_NULLPTR;
+        return USTRING_ERR;
     }
 
     if (self->len > len) {
@@ -389,7 +393,7 @@ bool str_contains_fn(const str_t* self, bool (*fn) (char)) {
 
 int str_trim_matches(str_t* self, const char* pattern) {
     if ((self == NULL) || (pattern == NULL)) {
-        return USTRING_ERR_NULLPTR;
+        return USTRING_ERR;
     }
 
     if (self->len == 0) {
@@ -435,7 +439,7 @@ int str_trim_matches(str_t* self, const char* pattern) {
 
 int str_trim_matches_fn(str_t* self, bool (*fn) (char)) {
     if ((self == NULL) || (fn == NULL)) {
-        return USTRING_ERR_NULLPTR;
+        return USTRING_ERR;
     }
 
     if (self->len == 0) {
@@ -462,7 +466,7 @@ int str_trim_matches_fn(str_t* self, bool (*fn) (char)) {
 
 int str_trim_start_matches(str_t* self, const char* pattern) {
     if ((self == NULL) || (pattern == NULL)) {
-        return USTRING_ERR_NULLPTR;
+        return USTRING_ERR;
     }
 
     if (self->len == 0) {
@@ -497,7 +501,7 @@ int str_trim_start_matches(str_t* self, const char* pattern) {
 
 int str_trim_start_matches_fn(str_t* self, bool (*fn) (char)) {
     if ((self == NULL) || (fn == NULL)) {
-        return USTRING_ERR_NULLPTR;
+        return USTRING_ERR;
     }
 
     if (self->len == 0) {
@@ -528,7 +532,7 @@ int str_trim_start_matches_fn(str_t* self, bool (*fn) (char)) {
 
 int str_trim_end_matches(str_t* self, const char* pattern) {
     if ((self == NULL) || (pattern == NULL)) {
-        return USTRING_ERR_NULLPTR;
+        return USTRING_ERR;
     }
 
     if (self->len == 0) {
@@ -559,7 +563,7 @@ int str_trim_end_matches(str_t* self, const char* pattern) {
 
 int str_trim_end_matches_fn(str_t* self, bool (*fn) (char)) {
     if ((self == NULL) || (fn == NULL)) {
-        return USTRING_ERR_NULLPTR;
+        return USTRING_ERR;
     }
 
     if (self->len == 0) {
@@ -579,7 +583,7 @@ int str_trim_end_matches_fn(str_t* self, bool (*fn) (char)) {
 
 int str_replace(str_t* self, const char* pattern, const char* replacement) {
     if ((self == NULL) || (pattern == NULL)) {
-        return USTRING_ERR_NULLPTR;
+        return USTRING_ERR;
     }
 
     if (self->len == 0) {
@@ -607,7 +611,7 @@ int str_replace(str_t* self, const char* pattern, const char* replacement) {
     size_t new_cap = self->cap;
     char* new_buffer = malloc(new_cap * sizeof(char));
     if (new_buffer == NULL) {
-        return USTRING_ERR_OOM;
+        return USTRING_ERR;
     }
 
     size_t read_idx = 0;
@@ -659,7 +663,7 @@ int str_replace(str_t* self, const char* pattern, const char* replacement) {
                 char* expanded_new_buffer = realloc(new_buffer, sizeof(char) * new_cap);
                 if (expanded_new_buffer == NULL) {
                     free(new_buffer);
-                    return USTRING_ERR_OOM;
+                    return USTRING_ERR;
                 } else {
                     new_buffer = expanded_new_buffer;
                 }
@@ -684,7 +688,7 @@ int str_replace(str_t* self, const char* pattern, const char* replacement) {
 
 int str_shrink_to_fit(str_t* self) {
     if (self == NULL) {
-        return false;
+        return USTRING_ERR;
     }
 
     if (self->cap == 0) {
@@ -693,7 +697,7 @@ int str_shrink_to_fit(str_t* self) {
 
     char* new_buffer = realloc(self->buffer, (self->len + 1) * sizeof(char));
     if (new_buffer == NULL) {
-        return USTRING_ERR_OOM;
+        return USTRING_ERR;
     } else {
         self->buffer = new_buffer;
     }
@@ -759,7 +763,7 @@ bool str_ends_with(const str_t* self, const char* pattern) {
 
 int str_to_lowercase(str_t* self) {
     if (self == NULL) {
-        return USTRING_ERR_NULLPTR;
+        return USTRING_ERR;
     }
 
     if (self->len == 0) {
@@ -775,7 +779,7 @@ int str_to_lowercase(str_t* self) {
 
 int str_to_uppercase(str_t* self) {
     if (self == NULL) {
-        return USTRING_ERR_NULLPTR;
+        return USTRING_ERR;
     }
 
     if (self->len == 0) {

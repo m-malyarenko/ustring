@@ -11,6 +11,9 @@
 #include <ustring/str_list.h>
 #include "str_list_p.h"
 
+#define USTRING_OK  ((int) 0)
+#define USTRING_ERR ((int) 1)
+
 str_list_t* str_list_new() {
     return str_list_with_capacity(STR_LIST_DEFAULT_CAPACITY);
 }
@@ -90,14 +93,14 @@ void str_list_drop(str_list_t** self) {
 
 int str_list_push(str_list_t* self, str_t* string) {
     if ((self == NULL) || (string == NULL)) {
-        return USTRING_ERR_NULLPTR;
+        return USTRING_ERR;
     }
 
     if (self->size == self->cap) {
         self->cap *= 2;
         str_t** new_buffer = realloc(self->buffer, self->cap * sizeof(str_t*));
         if (new_buffer == NULL) {
-            return USTRING_ERR_OOM;
+            return USTRING_ERR;
         } else {
             self->buffer = new_buffer;
         }

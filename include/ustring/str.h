@@ -17,8 +17,6 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "errcode.h"
-
 /**
  * @addtogroup API
  * @{
@@ -76,7 +74,7 @@ str_t* str_copy(const str_t* other);
  * @param self Pointer to the pointer to the initialized string instance
  * @note If @c self or @c *self is @c NULL, function does nothing
  * @warning After string is dropped it must not be used,
- *      the string pointer passed to the funcion will be set to @c NULL 
+ *      the string pointer passed to the function will be set to @c NULL 
  */
 void str_drop(str_t** self);
 
@@ -148,9 +146,10 @@ str_t* str_append(str_t* self, const char* string);
 /**
  * @brief Clears contents of the string
  * 
- * Marks string as zero-length keepeng buffer in place.
+ * Marks string as zero-length keeping buffer in place.
  * 
  * @param self Pointer to the initialized string instance
+ * @return On success returns zero. On failure returns non-zero value
  */
 int str_clear(str_t* self);
 
@@ -170,12 +169,12 @@ str_t* str_concat(const str_t* str_a, const str_t* str_b);
  * @b v-tab (\\v), @b newline (\\n), @b carriage return (\\r) symbols.
  * 
  * @param self Pointer to the initialized string instance
- * @returns On success, returns 0. On failure returns non-zero error code
+ * @returns On success returns zero. On failure returns non-zero value
  */
 int str_trim(str_t* self);
 
 /**
- * @brief Cheks two strings for equality
+ * @brief Checks two strings for equality
  * 
  * @param a,b Pointers to the initialized string instances
  * @returns @c true if strings are equal; @c false otherwise.
@@ -191,7 +190,7 @@ bool str_eq(const str_t* a, const str_t* b);
  * 
  * @param self Pointers to the initialized string instances
  * @param len Desired string length
- * @returns On success, returns 0. On failure returns non-zero error code
+ * @returns On success returns zero. On failure returns non-zero value
  */
 int str_truncate(str_t* self, size_t len);
 
@@ -235,7 +234,7 @@ bool str_contains_fn(const str_t* self, bool (*fn) (char));
  * 
  * @param self Pointer to the initialized string instance
  * @param pattern Pattern to be removed - NULL-terminated byte string of valid ASCII characters
- * @return On success, returns 0. On failure returns non-zero error code
+ * @return On success returns zero. On failure returns non-zero value
  */
 int str_trim_matches(str_t* self, const char* pattern);
 
@@ -250,7 +249,7 @@ int str_trim_matches(str_t* self, const char* pattern);
  * 
  * @param self Pointer to the initialized string instance
  * @param fn Predicate function
- * @return On success, returns 0. On failure returns non-zero error code
+ * @return On success returns zero. On failure returns non-zero value
  */
 int str_trim_matches_fn(str_t* self, bool (*fn) (char));
 
@@ -262,7 +261,7 @@ int str_trim_matches_fn(str_t* self, bool (*fn) (char));
  * 
  * @param self Pointer to the initialized string instance
  * @param pattern Pattern of prefix to be removed - NULL-terminated byte string of valid ASCII characters
- * @return On success, returns 0. On failure returns non-zero error code
+ * @return On success returns zero. On failure returns non-zero value
  */
 int str_trim_start_matches(str_t* self, const char* pattern);
 
@@ -274,7 +273,7 @@ int str_trim_start_matches(str_t* self, const char* pattern);
  * 
  * @param self Pointer to the initialized string instance
  * @param fn Predicate function
- * @return On success, returns 0. On failure returns non-zero error code
+ * @return On success returns zero. On failure returns non-zero value
  */
 int str_trim_start_matches_fn(str_t* self, bool (*fn) (char));
 
@@ -286,7 +285,7 @@ int str_trim_start_matches_fn(str_t* self, bool (*fn) (char));
  * 
  * @param self Pointer to the initialized string instance
  * @param pattern pattern of suffix to be removed - NULL-terminated byte string of valid ASCII characters
- * @return On success, returns 0. On failure returns non-zero error code
+ * @return On success returns zero. On failure returns non-zero value
  */
 int str_trim_end_matches(str_t* self, const char* pattern);
 
@@ -298,7 +297,7 @@ int str_trim_end_matches(str_t* self, const char* pattern);
  * 
  * @param self Pointer to the initialized string instance
  * @param fn Predicate function
- * @return On success, returns 0. On failure returns non-zero error code
+ * @return On success returns zero. On failure returns non-zero value
  */
 int str_trim_end_matches_fn(str_t* self, bool (*fn) (char));
 
@@ -314,7 +313,7 @@ int str_trim_end_matches_fn(str_t* self, bool (*fn) (char));
  * @note If @c replacement is @c NULL, it is treated as an empty string
  * 
  * @param self Pointer to the initialized string instance
- * @param pattern Pattern to be repplaced - NULL-terminated byte string of valid ASCII characters
+ * @param pattern Pattern to be replaced - NULL-terminated byte string of valid ASCII characters
  * @param replacement Substring to be inserted in the string replacing pattern
  * @return On success, returns 0. On failure returns non-zero error code
  */
@@ -328,7 +327,7 @@ int str_replace(str_t* self, const char* pattern, const char* replacement);
  * If @c self is @c NULL function does nothing and returns error code.
  * 
  * @param self Pointer to the initialized string instance
- * @return On success, returns 0. On failure returns non-zero error code
+ * @return On success returns zero. On failure returns non-zero value
  */
 int str_shrink_to_fit(str_t* self);
 
@@ -366,7 +365,7 @@ bool str_ends_with(const str_t* self, const char* pattern);
  * Converts all ASCII letter characters in the string to lower case. 
  * 
  * @param self Pointer to the initialized string instance
- * @return On success, returns 0. On failure returns non-zero error code
+ * @return On success returns zero. On failure returns non-zero value
  */
 int str_to_lowercase(str_t* self);
 
@@ -376,7 +375,7 @@ int str_to_lowercase(str_t* self);
  * Converts all ASCII letter characters in the string to upper case. 
  * 
  * @param self Pointer to the initialized string instance
- * @return On success, returns 0. On failure returns non-zero error code
+ * @return On success returns zero. On failure returns non-zero value
  */
 int str_to_uppercase(str_t* self);
 
